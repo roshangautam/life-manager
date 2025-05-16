@@ -1,0 +1,254 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// TransactionType represents the type of a financial transaction.
+enum TransactionType {
+  INCOME = 0;
+  EXPENSE = 1;
+  TRANSFER = 2;
+}
+
+// TransactionStatus represents the status of a transaction.
+enum TransactionStatus {
+  PENDING = 0;
+  COMPLETED = 1;
+  CANCELLED = 2;
+  FAILED = 3;
+}
+
+// Transaction represents a financial transaction.
+message Transaction {
+  string id = 1;
+  string household_id = 2;
+  string category_id = 3;
+  string description = 4;
+  double amount = 5;
+  TransactionType type = 6;
+  TransactionStatus status = 7;
+  google.protobuf.Timestamp transaction_date = 8;
+  string created_by = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  // Optional fields
+  string notes = 12;
+  repeated string tags = 13;
+  string receipt_attachment = 14;
+}
+
+// Category represents a transaction category.
+message Category {
+  string id = 1;
+  string household_id = 2;
+  string name = 3;
+  string description = 4;
+  string icon = 5;
+  string color = 6;
+  bool is_income = 7;
+  bool is_expense = 8;
+  string parent_id = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+// Budget represents a budget for a category or household.
+message Budget {
+  string id = 1;
+  string household_id = 2;
+  string category_id = 3;  // Optional, if null applies to all categories
+  string name = 4;
+  string description = 5;
+  double amount = 6;
+  string period = 7;  // monthly, weekly, yearly, etc.
+  google.protobuf.Timestamp start_date = 8;
+  google.protobuf.Timestamp end_date = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+// TransactionCreate represents the data needed to create a new transaction.
+message TransactionCreate {
+  string household_id = 1;
+  string category_id = 2;
+  string description = 3;
+  double amount = 4;
+  TransactionType type = 5;
+  google.protobuf.Timestamp transaction_date = 6;
+  string notes = 7;
+  repeated string tags = 8;
+  string receipt_attachment = 9;
+}
+
+// TransactionUpdate represents the data that can be updated for a transaction.
+message TransactionUpdate {
+  string id = 1;
+  optional string category_id = 2;
+  optional string description = 3;
+  optional double amount = 4;
+  optional TransactionType type = 5;
+  optional TransactionStatus status = 6;
+  optional google.protobuf.Timestamp transaction_date = 7;
+  optional string notes = 8;
+  repeated string tags = 9;  // Replaces all tags
+  optional string receipt_attachment = 10;
+}
+
+// CategoryCreate represents the data needed to create a new category.
+message CategoryCreate {
+  string household_id = 1;
+  string name = 2;
+  string description = 3;
+  string icon = 4;
+  string color = 5;
+  bool is_income = 6;
+  bool is_expense = 7;
+  string parent_id = 8;  // Optional, for subcategories
+}
+
+// BudgetCreate represents the data needed to create a new budget.
+message BudgetCreate {
+  string household_id = 1;
+  string category_id = 2;  // Optional
+  string name = 3;
+  string description = 4;
+  double amount = 5;
+  string period = 6;  // monthly, weekly, yearly, etc.
+  google.protobuf.Timestamp start_date = 7;
+  google.protobuf.Timestamp end_date = 8;  // Optional for recurring budgets
+}
+
+// Common responses
+message TransactionResponse {
+  Transaction transaction = 1;
+}
+
+message TransactionListResponse {
+  repeated Transaction transactions = 1;
+  int32 total = 2;
+}
+
+message CategoryResponse {
+  Category category = 1;
+}
+
+message CategoryListResponse {
+  repeated Category categories = 1;
+  int32 total = 2;
+}
+
+message BudgetResponse {
+  Budget budget = 1;
+}
+
+message BudgetListResponse {
+  repeated Budget budgets = 1;
+  int32 total = 2;
+}
+
+// Request/Response messages
+message IdRequest {
+  string id = 1;
+}
+
+message HouseholdIdRequest {
+  string household_id = 1;
+}
+
+message CategoryIdRequest {
+  string category_id = 1;
+}
+
+message BudgetIdRequest {
+  string budget_id = 1;
+}
+
+message DateRangeRequest {
+  google.protobuf.Timestamp start_date = 1;
+  google.protobuf.Timestamp end_date = 2;
+}
+
+message TransactionFilter {
+  string household_id = 1;
+  optional string category_id = 2;
+  optional TransactionType type = 3;
+  optional TransactionStatus status = 4;
+  optional google.protobuf.Timestamp start_date = 5;
+  optional google.protobuf.Timestamp end_date = 6;
+  repeated string tags = 7;
+  int32 page = 8;
+  int32 page_size = 9;
+}
+
+// FinanceService handles financial operations.
+service FinanceService {
+  // Transactions
+  rpc CreateTransaction(TransactionCreate) returns (TransactionResponse) {}
+  rpc GetTransaction(IdRequest) returns (TransactionResponse) {}
+  rpc ListTransactions(TransactionFilter) returns (TransactionListResponse) {}
+  rpc UpdateTransaction(TransactionUpdate) returns (TransactionResponse) {}
+  rpc DeleteTransaction(IdRequest) returns (google.protobuf.Empty) {}
+  
+  // Categories
+  rpc CreateCategory(CategoryCreate) returns (CategoryResponse) {}
+  rpc GetCategory(IdRequest) returns (CategoryResponse) {}
+  rpc ListCategories(HouseholdIdRequest) returns (CategoryListResponse) {}
+  rpc UpdateCategory(Category) returns (CategoryResponse) {}
+  rpc DeleteCategory(IdRequest) returns (google.protobuf.Empty) {}
+  
+  // Budgets
+  rpc CreateBudget(BudgetCreate) returns (BudgetResponse) {}
+  rpc GetBudget(IdRequest) returns (BudgetResponse) {}
+  rpc ListBudgets(HouseholdIdRequest) returns (BudgetListResponse) {}
+  rpc UpdateBudget(Budget) returns (BudgetResponse) {}
+  rpc DeleteBudget(IdRequest) returns (google.protobuf.Empty) {}
+  
+  // Reports
+  rpc GetSpendingByCategory(HouseholdIdRequest) returns (stream CategorySpending) {}
+  rpc GetSpendingOverTime(SpendingOverTimeRequest) returns (stream SpendingOverTimeResponse) {}
+  rpc GetBudgetSummary(HouseholdIdRequest) returns (BudgetSummaryResponse) {}
+}
+
+// Reporting messages
+message CategorySpending {
+  string category_id = 1;
+  string category_name = 2;
+  double amount = 3;
+  double percentage = 4;
+}
+
+message SpendingOverTimeRequest {
+  string household_id = 1;
+  string period = 2;  // daily, weekly, monthly, yearly
+  google.protobuf.Timestamp start_date = 3;
+  google.protobuf.Timestamp end_date = 4;
+  optional string category_id = 5;
+}
+
+message SpendingOverTimeResponse {
+  string period = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+  double amount = 4;
+}
+
+message BudgetSummaryResponse {
+  repeated BudgetSummary budgets = 1;
+  double total_budget = 2;
+  double total_spent = 3;
+  double remaining_budget = 4;
+  double utilization_percentage = 5;
+}
+
+message BudgetSummary {
+  string budget_id = 1;
+  string name = 2;
+  string category_id = 3;
+  string category_name = 4;
+  double budgeted_amount = 5;
+  double spent_amount = 6;
+  double remaining_amount = 7;
+  double utilization_percentage = 8;
+}

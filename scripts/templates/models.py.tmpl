@@ -1,0 +1,357 @@
+"""
+Data models for the Life Manager gRPC client.
+
+This module provides Python classes that correspond to the Protocol Buffer messages
+defined in the protobuf files. These classes provide a more Pythonic interface for
+working with the gRPC API.
+"""
+
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import List, Optional, Dict, Any, Type, TypeVar, get_type_hints
+import json
+
+# Import generated protobuf messages
+from .proto.api.v1 import user_pb2
+
+# Type variable for model classes
+T = TypeVar('T', bound='BaseModel')
+
+
+class BaseModel:
+    """Base class for all model classes."""
+    
+    @classmethod
+    def from_proto(cls: Type[T], proto_message) -> T:
+        """Create an instance from a protobuf message.
+        
+        Args:
+            proto_message: The protobuf message to convert.
+            
+        Returns:
+            An instance of the model class.
+        """
+        if proto_message is None:
+            return None
+            
+        # Get the field types from the class annotations
+        field_types = get_type_hints(cls)
+        
+        # Convert the protobuf message to a dictionary
+        data = {}
+        for field_name, field_type in field_types.items():
+            # Skip private attributes
+            if field_name.startswith('_'):
+                continue
+                
+            # Get the value from the protobuf message
+            if hasattr(proto_message, field_name):
+                value = getattr(proto_message, field_name)
+                
+                # Handle nested messages
+                if hasattr(value, 'DESCRIPTOR') and hasattr(cls, f'_from_proto_{field_name}'):
+                    # Use custom converter if available
+                    converter = getattr(cls, f'_from_proto_{field_name}')
+                    data[field_name] = converter(value)
+                elif hasattr(value, 'DESCRIPTOR'):
+                    # Recursively convert nested messages
+                    nested_cls = field_type
+                    if hasattr(nested_cls, 'from_proto'):
+                        data[field_name] = nested_cls.from_proto(value)
+                    else:
+                        data[field_name] = value
+                else:
+                    data[field_name] = value
+        
+        return cls(**data)
+    
+    def to_proto(self, proto_message):
+        """Convert this instance to a protobuf message.
+        
+        Args:
+            proto_message: The protobuf message to populate.
+            
+        Returns:
+            The populated protobuf message.
+        """
+        if proto_message is None:
+            return None
+            
+        # Get the field types from the class annotations
+        field_types = get_type_hints(self.__class__)
+        
+        # Copy fields to the protobuf message
+        for field_name, field_type in field_types.items():
+            # Skip private attributes
+            if field_name.startswith('_'):
+                continue
+                
+            # Skip if the field doesn't exist in the protobuf message
+            if not hasattr(proto_message, field_name):
+                continue
+                
+            # Get the value from this instance
+            value = getattr(self, field_name, None)
+            
+            # Skip None values to avoid overwriting defaults
+            if value is None:
+                continue
+                
+            # Handle nested models
+            if hasattr(value, 'to_proto') and hasattr(proto_message, field_name):
+                # Get the nested message and update it
+                nested_proto = getattr(proto_message, field_name)
+                value.to_proto(nested_proto)
+            else:
+                # Handle special cases for timestamps and other complex types
+                if hasattr(self, f'_to_proto_{field_name}'):
+                    # Use custom converter if available
+                    converter = getattr(self, f'_to_proto_{field_name}')
+                    value = converter(value)
+                
+                # Set the value on the protobuf message
+                setattr(proto_message, field_name, value)
+        
+        return proto_message
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert this instance to a dictionary.
+        
+        Returns:
+            A dictionary representation of this instance.
+        """
+        result = {}
+        
+        # Get the field types from the class annotations
+        field_types = get_type_hints(self.__class__)
+        
+        # Convert each field to a serializable type
+        for field_name, field_type in field_types.items():
+            # Skip private attributes
+            if field_name.startswith('_'):
+                continue
+                
+            # Get the value
+            value = getattr(self, field_name, None)
+            
+            # Skip None values
+            if value is None:
+                continue
+                
+            # Handle nested models
+            if hasattr(value, 'to_dict'):
+                result[field_name] = value.to_dict()
+            # Handle lists of models
+            elif isinstance(value, list) and value and hasattr(value[0], 'to_dict'):
+                result[field_name] = [item.to_dict() for item in value]
+            # Handle datetimes
+            elif isinstance(value, datetime):
+                result[field_name] = value.isoformat()
+            else:
+                result[field_name] = value
+        
+        return result
+    
+    @classmethod
+    def from_dict(cls: Type[T], data: Dict[str, Any]) -> T:
+        """Create an instance from a dictionary.
+        
+        Args:
+            data: A dictionary of field names to values.
+            
+        Returns:
+            An instance of the model class.
+        """
+        if data is None:
+            return None
+            
+        # Get the field types from the class annotations
+        field_types = get_type_hints(cls)
+        
+        # Convert the dictionary to the appropriate types
+        kwargs = {}
+        for field_name, field_type in field_types.items():
+            # Skip private attributes
+            if field_name.startswith('_'):
+                continue
+                
+            # Skip if the field is not in the data
+            if field_name not in data:
+                continue
+                
+            value = data[field_name]
+            
+            # Skip None values
+            if value is None:
+                continue
+                
+            # Handle nested models
+            if hasattr(field_type, 'from_dict') and isinstance(value, dict):
+                kwargs[field_name] = field_type.from_dict(value)
+            # Handle lists of models
+            elif (hasattr(field_type, '__origin__') and 
+                  field_type.__origin__ is list and 
+                  hasattr(field_type.__args__[0], 'from_dict') and 
+                  isinstance(value, list)):
+                item_cls = field_type.__args__[0]
+                kwargs[field_name] = [item_cls.from_dict(item) if isinstance(item, dict) else item for item in value]
+            # Handle datetimes
+            elif field_type is datetime and isinstance(value, str):
+                kwargs[field_name] = datetime.fromisoformat(value)
+            else:
+                kwargs[field_name] = value
+        
+        return cls(**kwargs)
+    
+    def to_json(self) -> str:
+        """Convert this instance to a JSON string.
+        
+        Returns:
+            A JSON string representation of this instance.
+        """
+        return json.dumps(self.to_dict(), indent=2, default=str)
+    
+    @classmethod
+    def from_json(cls: Type[T], json_str: str) -> T:
+        """Create an instance from a JSON string.
+        
+        Args:
+            json_str: A JSON string representation of the instance.
+            
+        Returns:
+            An instance of the model class.
+        """
+        data = json.loads(json_str)
+        return cls.from_dict(data)
+    
+    def __str__(self) -> str:
+        """Return a string representation of this instance."""
+        return self.to_json()
+    
+    def __repr__(self) -> str:
+        """Return a string representation of this instance for debugging."""
+        return f"<{self.__class__.__name__} {self.to_dict()}>"
+
+
+@dataclass
+class User(BaseModel):
+    """A user in the Life Manager system."""
+    
+    id: str
+    email: str
+    full_name: str
+    is_active: bool = True
+    is_superuser: bool = False
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    
+    @classmethod
+    def from_proto(cls, proto_message) -> 'User':
+        """Create a User from a protobuf message."""
+        if proto_message is None:
+            return None
+            
+        return cls(
+            id=proto_message.id,
+            email=proto_message.email,
+            full_name=proto_message.full_name,
+            is_active=proto_message.is_active,
+            is_superuser=proto_message.is_superuser,
+            created_at=cls._timestamp_to_datetime(proto_message.created_at),
+            updated_at=cls._timestamp_to_datetime(proto_message.updated_at),
+        )
+    
+    def to_proto(self, proto_message=None):
+        """Convert this User to a protobuf message."""
+        if proto_message is None:
+            proto_message = user_pb2.User()
+            
+        proto_message.id = self.id
+        proto_message.email = self.email
+        proto_message.full_name = self.full_name
+        proto_message.is_active = self.is_active
+        proto_message.is_superuser = self.is_superuser
+        
+        if self.created_at is not None:
+            proto_message.created_at.FromDatetime(self.created_at)
+            
+        if self.updated_at is not None:
+            proto_message.updated_at.FromDatetime(self.updated_at)
+            
+        return proto_message
+    
+    @staticmethod
+    def _timestamp_to_datetime(timestamp) -> Optional[datetime]:
+        """Convert a protobuf Timestamp to a Python datetime."""
+        if timestamp is None or not timestamp.seconds:
+            return None
+        return timestamp.ToDatetime()
+
+
+@dataclass
+class UserList(BaseModel):
+    """A paginated list of users."""
+    
+    users: List[User] = field(default_factory=list)
+    total: int = 0
+    page: int = 1
+    page_size: int = 10
+    
+    @classmethod
+    def from_proto(cls, proto_message) -> 'UserList':
+        """Create a UserList from a protobuf message."""
+        if proto_message is None:
+            return cls()
+            
+        return cls(
+            users=[User.from_proto(user) for user in proto_message.users],
+            total=proto_message.total,
+            page=proto_message.page,
+            page_size=proto_message.page_size,
+        )
+    
+    def to_proto(self, proto_message=None):
+        """Convert this UserList to a protobuf message."""
+        if proto_message is None:
+            proto_message = user_pb2.UserListResponse()
+            
+        proto_message.users.extend([user.to_proto() for user in self.users])
+        proto_message.total = self.total
+        proto_message.page = self.page
+        proto_message.page_size = self.page_size
+        
+        return proto_message
+
+
+@dataclass
+class AuthResponse(BaseModel):
+    """Authentication response containing an access token and user info."""
+    
+    access_token: str
+    token_type: str
+    user: User
+    
+    @classmethod
+    def from_proto(cls, proto_message) -> 'AuthResponse':
+        """Create an AuthResponse from a protobuf message."""
+        if proto_message is None:
+            return None
+            
+        return cls(
+            access_token=proto_message.access_token,
+            token_type=proto_message.token_type,
+            user=User.from_proto(proto_message.user),
+        )
+    
+    def to_proto(self, proto_message=None):
+        """Convert this AuthResponse to a protobuf message."""
+        if proto_message is None:
+            proto_message = user_pb2.AuthResponse()
+            
+        proto_message.access_token = self.access_token
+        proto_message.token_type = self.token_type
+        
+        if self.user is not None:
+            self.user.to_proto(proto_message.user)
+            
+        return proto_message

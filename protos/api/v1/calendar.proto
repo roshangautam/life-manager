@@ -1,0 +1,217 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// EventType represents the type of calendar event.
+enum EventType {
+  GENERIC = 0;
+  MEETING = 1;
+  APPOINTMENT = 2;
+  REMINDER = 3;
+  BIRTHDAY = 4;
+  HOLIDAY = 5;
+  TASK = 6;
+  OTHER = 7;
+}
+
+// EventStatus represents the status of an event.
+enum EventStatus {
+  TENTATIVE = 0;
+  CONFIRMED = 1;
+  CANCELLED = 2;
+  COMPLETED = 3;
+}
+
+// RecurrenceFrequency defines how often an event repeats.
+enum RecurrenceFrequency {
+  NONE = 0;
+  DAILY = 1;
+  WEEKLY = 2;
+  MONTHLY = 3;
+  YEARLY = 4;
+}
+
+// Event represents a calendar event.
+message Event {
+  string id = 1;
+  string household_id = 2;
+  string title = 3;
+  string description = 4;
+  EventType type = 5;
+  EventStatus status = 6;
+  
+  // Timing
+  google.protobuf.Timestamp start_time = 7;
+  google.protobuf.Timestamp end_time = 8;
+  bool is_all_day = 9;
+  
+  // Location
+  string location = 10;
+  
+  // Recurrence
+  bool is_recurring = 11;
+  RecurrenceFrequency recurrence_frequency = 12;
+  int32 recurrence_interval = 13;  // e.g., every 2 weeks
+  int32 recurrence_count = 14;      // Number of occurrences, 0 for infinite
+  google.protobuf.Timestamp recurrence_end_date = 15;
+  repeated int32 recurrence_by_weekday = 16;  // 0=Sunday, 1=Monday, etc.
+  
+  // Metadata
+  string created_by = 17;
+  google.protobuf.Timestamp created_at = 18;
+  google.protobuf.Timestamp updated_at = 19;
+  
+  // Optional fields
+  string color = 20;
+  repeated string tags = 21;
+  repeated string attendees = 22;  // User IDs
+  string timezone = 23;
+}
+
+// EventCreate represents the data needed to create a new event.
+message EventCreate {
+  string household_id = 1;
+  string title = 2;
+  string description = 3;
+  EventType type = 4;
+  google.protobuf.Timestamp start_time = 5;
+  google.protobuf.Timestamp end_time = 6;
+  bool is_all_day = 7;
+  string location = 8;
+  
+  // Recurrence
+  bool is_recurring = 9;
+  RecurrenceFrequency recurrence_frequency = 10;
+  int32 recurrence_interval = 11;
+  int32 recurrence_count = 12;
+  google.protobuf.Timestamp recurrence_end_date = 13;
+  repeated int32 recurrence_by_weekday = 14;
+  
+  // Optional fields
+  string color = 15;
+  repeated string tags = 16;
+  repeated string attendee_emails = 17;
+  string timezone = 18;
+}
+
+// EventUpdate represents the data that can be updated for an event.
+message EventUpdate {
+  string id = 1;
+  optional string title = 2;
+  optional string description = 3;
+  optional EventType type = 4;
+  optional google.protobuf.Timestamp start_time = 5;
+  optional google.protobuf.Timestamp end_time = 6;
+  optional bool is_all_day = 7;
+  optional string location = 8;
+  optional EventStatus status = 9;
+  optional bool is_recurring = 10;
+  
+  // Recurrence
+  optional RecurrenceFrequency recurrence_frequency = 11;
+  optional int32 recurrence_interval = 12;
+  optional int32 recurrence_count = 13;
+  optional google.protobuf.Timestamp recurrence_end_date = 14;
+  repeated int32 recurrence_by_weekday = 15;  // Replaces all weekdays
+  
+  // Optional fields
+  optional string color = 16;
+  repeated string tags = 17;  // Replaces all tags
+  repeated string attendee_emails = 18;  // Replaces all attendees
+  optional string timezone = 19;
+  
+  // Update scope for recurring events
+  bool update_all_occurrences = 20;
+  bool update_future_occurrences = 21;
+}
+
+// EventResponse is the response containing a single event.
+message EventResponse {
+  Event event = 1;
+}
+
+// EventListResponse is the response containing a list of events.
+message EventListResponse {
+  repeated Event events = 1;
+  int32 total = 2;
+}
+
+// EventFilter is used to filter events.
+message EventFilter {
+  string household_id = 1;
+  optional google.protobuf.Timestamp start_date = 2;
+  optional google.protobuf.Timestamp end_date = 3;
+  repeated EventType types = 4;
+  repeated string created_by = 5;
+  repeated string tags = 6;
+  bool include_recurring = 7;
+  int32 page = 8;
+  int32 page_size = 9;
+}
+
+// CalendarService handles calendar and event operations.
+service CalendarService {
+  // Create a new event.
+  rpc CreateEvent(EventCreate) returns (EventResponse) {}
+  
+  // Get an event by ID.
+  rpc GetEvent(IdRequest) returns (EventResponse) {}
+  
+  // List events based on filters.
+  rpc ListEvents(EventFilter) returns (EventListResponse) {}
+  
+  // Update an event.
+  rpc UpdateEvent(EventUpdate) returns (EventResponse) {}
+  
+  // Delete an event.
+  rpc DeleteEvent(DeleteEventRequest) returns (google.protobuf.Empty) {}
+  
+  // Get events for a specific date range.
+  rpc GetEventsInRange(EventsInRangeRequest) returns (EventListResponse) {}
+  
+  // Get upcoming events.
+  rpc GetUpcomingEvents(UpcomingEventsRequest) returns (EventListResponse) {}
+  
+  // Share an event with other users.
+  rpc ShareEvent(ShareEventRequest) returns (google.protobuf.Empty) {}
+}
+
+// Common request/response messages
+message IdRequest {
+  string id = 1;
+}
+
+message DeleteEventRequest {
+  string id = 1;
+  bool delete_all_occurrences = 2;
+  bool delete_future_occurrences = 3;
+}
+
+message EventsInRangeRequest {
+  string household_id = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+  bool include_recurring = 4;
+}
+
+message UpcomingEventsRequest {
+  string household_id = 1;
+  int32 days_ahead = 2;  // Number of days to look ahead
+  int32 limit = 3;       // Maximum number of events to return
+}
+
+message ShareEventRequest {
+  string event_id = 1;
+  repeated string user_emails = 2;
+  string message = 3;
+}
+
+// Response messages for calendar operations
+message ShareEventResponse {
+  string event_id = 1;
+  int32 shared_with_count = 2;
+  repeated string failed_emails = 3;
+}

@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// User represents a user in the system.
+message User {
+  string id = 1;
+  string email = 2;
+  string full_name = 3;
+  bool is_active = 4;
+  bool is_superuser = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+// UserCreate represents the data needed to create a new user.
+message UserCreate {
+  string email = 1;
+  string password = 2;
+  string full_name = 3;
+}
+
+// UserUpdate represents the data that can be updated for a user.
+message UserUpdate {
+  string id = 1;
+  optional string email = 2;
+  optional string full_name = 3;
+  optional bool is_active = 4;
+  optional string password = 5;
+}
+
+// UserResponse is the response containing a single user.
+message UserResponse {
+  User user = 1;
+}
+
+// UserListResponse is the response containing a list of users.
+message UserListResponse {
+  repeated User users = 1;
+  int32 total = 2;
+}
+
+// UserIdRequest is used to request a user by ID.
+message UserIdRequest {
+  string id = 1;
+}
+
+// UserEmailRequest is used to request a user by email.
+message UserEmailRequest {
+  string email = 1;
+}
+
+// UserService handles user-related operations.
+service UserService {
+  // Create a new user.
+  rpc CreateUser(UserCreate) returns (UserResponse) {}
+  
+  // Get a user by ID.
+  rpc GetUser(UserIdRequest) returns (UserResponse) {}
+  
+  // Get a user by email.
+  rpc GetUserByEmail(UserEmailRequest) returns (UserResponse) {}
+  
+  // List all users with pagination.
+  rpc ListUsers(google.protobuf.Empty) returns (UserListResponse) {}
+  
+  // Update a user.
+  rpc UpdateUser(UserUpdate) returns (UserResponse) {}
+  
+  // Delete a user.
+  rpc DeleteUser(UserIdRequest) returns (google.protobuf.Empty) {}
+  
+  // Authenticate a user and return a token.
+  rpc Authenticate(LoginRequest) returns (AuthResponse) {}
+  
+  // Verify a token and return the user.
+  rpc VerifyToken(TokenRequest) returns (UserResponse) {}
+}
+
+// LoginRequest is used for user authentication.
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+// AuthResponse is returned after successful authentication.
+message AuthResponse {
+  string access_token = 1;
+  string token_type = 2;
+  int64 expires_in = 3;
+  User user = 4;
+}
+
+// TokenRequest contains a JWT token for verification.
+message TokenRequest {
+  string token = 1;
+}

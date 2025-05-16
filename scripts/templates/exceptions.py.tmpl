@@ -1,0 +1,243 @@
+"""
+Custom exceptions for the Life Manager gRPC client.
+"""
+
+from typing import Optional, List, Tuple, Dict, Any
+import grpc
+
+
+class GRPCClientError(Exception):
+    """Base exception for all gRPC client errors."""
+    
+    def __init__(
+        self,
+        message: str,
+        code: Optional[grpc.StatusCode] = None,
+        details: Optional[str] = None,
+        metadata: Optional[List[Tuple[str, str]]] = None
+    ):
+        """Initialize the exception.
+        
+        Args:
+            message: The error message.
+            code: The gRPC status code.
+            details: Additional error details.
+            metadata: Additional metadata from the gRPC call.
+        """
+        self.message = message
+        self.code = code
+        self.details = details
+        self.metadata = metadata or []
+        
+        # Format the error message
+        error_parts = [f"GRPC Error: {message}"]
+        if code is not None:
+            error_parts.append(f"Code: {code.name} ({code.value})")
+        if details:
+            error_parts.append(f"Details: {details}")
+            
+        super().__init__(" ".join(error_parts))
+
+
+class GRPCClientConnectionError(GRPCClientError):
+    """Raised when there is a connection error to the gRPC server."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Failed to connect to gRPC server: {message}",
+            code=grpc.StatusCode.UNAVAILABLE,
+            **kwargs
+        )
+
+
+class GRPCClientAuthenticationError(GRPCClientError):
+    """Raised when authentication fails."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Authentication failed: {message}",
+            code=grpc.StatusCode.UNAUTHENTICATED,
+            **kwargs
+        )
+
+
+class GRPCClientPermissionError(GRPCClientError):
+    """Raised when the user doesn't have permission to perform an action."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Permission denied: {message}",
+            code=grpc.StatusCode.PERMISSION_DENIED,
+            **kwargs
+        )
+
+
+class GRPCClientNotFoundError(GRPCClientError):
+    """Raised when a requested resource is not found."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Resource not found: {message}",
+            code=grpc.StatusCode.NOT_FOUND,
+            **kwargs
+        )
+
+
+class GRPCClientValidationError(GRPCClientError):
+    """Raised when there is a validation error in the request."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Validation error: {message}",
+            code=grpc.StatusCode.INVALID_ARGUMENT,
+            **kwargs
+        )
+
+
+class GRPCClientAlreadyExistsError(GRPCClientError):
+    """Raised when trying to create a resource that already exists."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Resource already exists: {message}",
+            code=grpc.StatusCode.ALREADY_EXISTS,
+            **kwargs
+        )
+
+
+class GRPCClientUnavailableError(GRPCClientError):
+    """Raised when the gRPC service is unavailable."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Service unavailable: {message}",
+            code=grpc.StatusCode.UNAVAILABLE,
+            **kwargs
+        )
+
+
+class GRPCClientDeadlineExceededError(GRPCClientError):
+    """Raised when the request deadline is exceeded."""
+    
+    def __init__(self, message: str = "Request timed out", **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            message,
+            code=grpc.StatusCode.DEADLINE_EXCEEDED,
+            **kwargs
+        )
+
+
+class GRPCClientResourceExhaustedError(GRPCClientError):
+    """Raised when the server is out of resources."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Resource exhausted: {message}",
+            code=grpc.StatusCode.RESOURCE_EXHAUSTED,
+            **kwargs
+        )
+
+
+class GRPCClientFailedPreconditionError(GRPCClientError):
+    """Raised when the request fails a precondition check."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Precondition failed: {message}",
+            code=grpc.StatusCode.FAILED_PRECONDITION,
+            **kwargs
+        )
+
+
+class GRPCClientAbortedError(GRPCClientError):
+    """Raised when the operation was aborted."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Operation aborted: {message}",
+            code=grpc.StatusCode.ABORTED,
+            **kwargs
+        )
+
+
+class GRPCClientOutOfRangeError(GRPCClientError):
+    """Raised when an operation was attempted past the valid range."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Out of range: {message}",
+            code=grpc.StatusCode.OUT_OF_RANGE,
+            **kwargs
+        )
+
+
+class GRPCClientUnimplementedError(GRPCClientError):
+    """Raised when the requested method is not implemented."""
+    
+    def __init__(self, method: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Method not implemented: {method}",
+            code=grpc.StatusCode.UNIMPLEMENTED,
+            **kwargs
+        )
+
+
+class GRPCClientInternalError(GRPCClientError):
+    """Raised when there is an internal server error."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Internal server error: {message}",
+            code=grpc.StatusCode.INTERNAL,
+            **kwargs
+        )
+
+
+class GRPCClientUnavailableError(GRPCClientError):
+    """Raised when the service is currently unavailable."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Service unavailable: {message}",
+            code=grpc.StatusCode.UNAVAILABLE,
+            **kwargs
+        )
+
+
+class GRPCClientDataLossError(GRPCClientError):
+    """Raised when unrecoverable data loss or corruption has occurred."""
+    
+    def __init__(self, message: str, **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            f"Data loss: {message}",
+            code=grpc.StatusCode.DATA_LOSS,
+            **kwargs
+        )
+
+
+class GRPCClientUnauthenticatedError(GRPCClientError):
+    """Raised when the request does not have valid authentication credentials."""
+    
+    def __init__(self, message: str = "Authentication required", **kwargs):
+        """Initialize the exception."""
+        super().__init__(
+            message,
+            code=grpc.StatusCode.UNAUTHENTICATED,
+            **kwargs
+        )

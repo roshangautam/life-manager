@@ -1,0 +1,28 @@
+"""
+${package_name}
+${'=' * (len(package_name) + 2)}
+
+A Python client for the Life Manager gRPC API.
+"""
+
+from .client import Client
+from .exceptions import (
+    GRPCClientError,
+    GRPCClientConnectionError,
+    GRPCClientAuthenticationError,
+    GRPCClientPermissionError,
+    GRPCClientNotFoundError,
+    GRPCClientValidationError,
+)
+from .models import *
+
+__version__ = "${version}"
+__all__ = [
+    'Client',
+    'GRPCClientError',
+    'GRPCClientConnectionError',
+    'GRPCClientAuthenticationError',
+    'GRPCClientPermissionError',
+    'GRPCClientNotFoundError',
+    'GRPCClientValidationError',
+]

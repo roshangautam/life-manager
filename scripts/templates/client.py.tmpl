@@ -1,0 +1,393 @@
+"""
+Client for interacting with the Life Manager gRPC API.
+"""
+
+import os
+import grpc
+from typing import Optional, Dict, Any, List, Union, Type, TypeVar, Callable
+from dataclasses import asdict
+
+import grpc
+from google.protobuf.message import Message
+
+from .exceptions import (
+    GRPCClientError,
+    GRPCClientConnectionError,
+    GRPCClientAuthenticationError,
+    GRPCClientPermissionError,
+    GRPCClientNotFoundError,
+    GRPCClientValidationError,
+)
+from .models import *
+
+# Import generated protobuf modules
+from .proto.api.v1 import user_pb2
+from .proto.api.v1 import user_pb2_grpc
+
+# Type variables
+T = TypeVar('T')
+RequestType = TypeVar('RequestType', bound=Message)
+ResponseType = TypeVar('ResponseType', bound=Message)
+
+# Default gRPC options
+DEFAULT_OPTIONS = [
+    ('grpc.max_send_message_length', 100 * 1024 * 1024),  # 100MB
+    ('grpc.max_receive_message_length', 100 * 1024 * 1024),  # 100MB
+    ('grpc.keepalive_time_ms', 30000),  # 30 seconds
+    ('grpc.keepalive_timeout_ms', 10000),  # 10 seconds
+    ('grpc.keepalive_permit_without_calls', 1),
+    ('grpc.http2.max_pings_without_data', 0),
+    ('grpc.http2.min_time_between_pings_ms', 10000),  # 10 seconds
+]
+
+
+class Client:
+    """Client for interacting with the Life Manager gRPC API."""
+    
+    def __init__(
+        self,
+        host: str = "localhost",
+        port: int = 50051,
+        secure: bool = False,
+        credentials: Optional[grpc.ChannelCredentials] = None,
+        options: Optional[List[tuple]] = None,
+        token: Optional[str] = None,
+    ):
+        """Initialize the gRPC client.
+        
+        Args:
+            host: The server hostname or IP address.
+            port: The server port.
+            secure: Whether to use a secure connection (TLS).
+            credentials: Optional gRPC channel credentials.
+            options: Additional gRPC channel options.
+            token: Optional JWT token for authentication.
+        """
+        self.host = host
+        self.port = port
+        self.secure = secure
+        self.token = token
+        
+        # Set up channel options
+        self.options = DEFAULT_OPTIONS.copy()
+        if options:
+            self.options.extend(options)
+        
+        # Set up credentials if not provided
+        if secure and credentials is None:
+            # In production, you should use proper SSL/TLS certificates
+            credentials = grpc.ssl_channel_credentials()
+        
+        # Create the gRPC channel
+        target = f"{host}:{port}"
+        if secure:
+            self.channel = grpc.secure_channel(target, credentials, options=self.options)
+        else:
+            self.channel = grpc.insecure_channel(target, options=self.options)
+        
+        # Initialize service stubs
+        self._init_stubs()
+    
+    def _init_stubs(self):
+        """Initialize gRPC service stubs."""
+        # User service
+        self.user_stub = user_pb2_grpc.UserServiceStub(self.channel)
+        
+        # Add more service stubs here as needed
+        # self.household_stub = household_pb2_grpc.HouseholdServiceStub(self.channel)
+        # self.finance_stub = finance_pb2_grpc.FinanceServiceStub(self.channel)
+        # self.calendar_stub = calendar_pb2_grpc.CalendarServiceStub(self.channel)
+    
+    def _get_metadata(self, metadata: Optional[Dict[str, str]] = None) -> List[tuple]:
+        """Get metadata with authentication token.
+        
+        Args:
+            metadata: Additional metadata to include.
+            
+        Returns:
+            A list of metadata tuples.
+        """
+        result = []
+        
+        # Add authentication token if available
+        if self.token:
+            result.append(('authorization', f'Bearer {self.token}'))
+        
+        # Add additional metadata
+        if metadata:
+            result.extend(metadata.items())
+            
+        return result
+    
+    def _handle_grpc_error(self, error: grpc.RpcError):
+        """Handle gRPC errors and raise appropriate exceptions.
+        
+        Args:
+            error: The gRPC error to handle.
+            
+        Raises:
+            GRPCClientError: A more specific client error based on the gRPC status code.
+        """
+        if error.code() == grpc.StatusCode.UNAUTHENTICATED:
+            raise GRPCClientAuthenticationError(
+                f"Authentication failed: {error.details()}",
+                error.code(),
+                error.details(),
+                error.trailing_metadata()
+            )
+        elif error.code() == grpc.StatusCode.PERMISSION_DENIED:
+            raise GRPCClientPermissionError(
+                f"Permission denied: {error.details()}",
+                error.code(),
+                error.details(),
+                error.trailing_metadata()
+            )
+        elif error.code() == grpc.StatusCode.NOT_FOUND:
+            raise GRPCClientNotFoundError(
+                f"Resource not found: {error.details()}",
+                error.code(),
+                error.details(),
+                error.trailing_metadata()
+            )
+        elif error.code() == grpc.StatusCode.INVALID_ARGUMENT:
+            raise GRPCClientValidationError(
+                f"Invalid argument: {error.details()}",
+                error.code(),
+                error.details(),
+                error.trailing_metadata()
+            )
+        else:
+            raise GRPCClientError(
+                f"gRPC error: {error.details()}",
+                error.code(),
+                error.details(),
+                error.trailing_metadata()
+            )
+    
+    def _call_rpc(
+        self,
+        method: Callable,
+        request: Optional[Message] = None,
+        metadata: Optional[Dict[str, str]] = None,
+        timeout: Optional[float] = None,
+    ) -> Any:
+        """Call a gRPC method with error handling.
+        
+        Args:
+            method: The gRPC method to call.
+            request: The request message.
+            metadata: Additional metadata to include in the request.
+            timeout: Optional timeout in seconds.
+            
+        Returns:
+            The response from the gRPC method.
+            
+        Raises:
+            GRPCClientError: If the gRPC call fails.
+        """
+        try:
+            kwargs = {}
+            if metadata is not None or self.token is not None:
+                kwargs['metadata'] = self._get_metadata(metadata)
+            if timeout is not None:
+                kwargs['timeout'] = timeout
+                
+            if request is not None:
+                return method(request, **kwargs)
+            else:
+                return method(**kwargs)
+                
+        except grpc.RpcError as e:
+            self._handle_grpc_error(e)
+        except Exception as e:
+            raise GRPCClientError(f"Unexpected error: {str(e)}")
+    
+    # User Service Methods
+    
+    def create_user(
+        self,
+        email: str,
+        password: str,
+        full_name: str,
+        **kwargs
+    ) -> User:
+        """Create a new user.
+        
+        Args:
+            email: The user's email address.
+            password: The user's password.
+            full_name: The user's full name.
+            **kwargs: Additional keyword arguments to pass to the request.
+            
+        Returns:
+            The created user.
+        """
+        request = user_pb2.CreateUserRequest(
+            email=email,
+            password=password,
+            full_name=full_name,
+            **kwargs
+        )
+        response = self._call_rpc(self.user_stub.CreateUser, request)
+        return User.from_proto(response.user)
+    
+    def get_user(self, user_id: str, **kwargs) -> User:
+        """Get a user by ID.
+        
+        Args:
+            user_id: The ID of the user to retrieve.
+            **kwargs: Additional keyword arguments to pass to the request.
+            
+        Returns:
+            The requested user.
+        """
+        request = user_pb2.GetUserRequest(id=user_id, **kwargs)
+        response = self._call_rpc(self.user_stub.GetUser, request)
+        return User.from_proto(response.user)
+    
+    def get_user_by_email(self, email: str, **kwargs) -> User:
+        """Get a user by email.
+        
+        Args:
+            email: The email address of the user to retrieve.
+            **kwargs: Additional keyword arguments to pass to the request.
+            
+        Returns:
+            The requested user.
+        """
+        request = user_pb2.GetUserByEmailRequest(email=email, **kwargs)
+        response = self._call_rpc(self.user_stub.GetUserByEmail, request)
+        return User.from_proto(response.user)
+    
+    def list_users(
+        self,
+        page: int = 1,
+        page_size: int = 10,
+        **kwargs
+    ) -> UserList:
+        """List users with pagination.
+        
+        Args:
+            page: The page number (1-based).
+            page_size: The number of items per page.
+            **kwargs: Additional keyword arguments to pass to the request.
+            
+        Returns:
+            A paginated list of users.
+        """
+        request = user_pb2.ListUsersRequest(
+            page=page,
+            page_size=page_size,
+            **kwargs
+        )
+        response = self._call_rpc(self.user_stub.ListUsers, request)
+        return UserList.from_proto(response)
+    
+    def update_user(
+        self,
+        user_id: str,
+        **kwargs
+    ) -> User:
+        """Update a user.
+        
+        Args:
+            user_id: The ID of the user to update.
+            **kwargs: Fields to update (email, full_name, is_active, is_superuser).
+            
+        Returns:
+            The updated user.
+        """
+        # Create a request with only the provided fields
+        request_kwargs = {"id": user_id}
+        for field in ["email", "full_name", "is_active", "is_superuser"]:
+            if field in kwargs:
+                request_kwargs[field] = kwargs[field]
+        
+        request = user_pb2.UpdateUserRequest(**request_kwargs)
+        response = self._call_rpc(self.user_stub.UpdateUser, request)
+        return User.from_proto(response.user)
+    
+    def delete_user(self, user_id: str, **kwargs) -> None:
+        """Delete a user.
+        
+        Args:
+            user_id: The ID of the user to delete.
+            **kwargs: Additional keyword arguments to pass to the request.
+        """
+        request = user_pb2.DeleteUserRequest(id=user_id, **kwargs)
+        self._call_rpc(self.user_stub.DeleteUser, request)
+    
+    def authenticate(self, email: str, password: str, **kwargs) -> AuthResponse:
+        """Authenticate a user and get an access token.
+        
+        Args:
+            email: The user's email address.
+            password: The user's password.
+            **kwargs: Additional keyword arguments to pass to the request.
+            
+        Returns:
+            An authentication response containing the access token and user info.
+        """
+        request = user_pb2.AuthRequest(
+            email=email,
+            password=password,
+            **kwargs
+        )
+        response = self._call_rpc(self.user_stub.Authenticate, request)
+        
+        # Update the client's token if authentication was successful
+        self.token = response.access_token
+        
+        return AuthResponse(
+            access_token=response.access_token,
+            token_type=response.token_type,
+            user=User.from_proto(response.user)
+        )
+    
+    def verify_token(self, token: Optional[str] = None, **kwargs) -> User:
+        """Verify an access token and get the associated user.
+        
+        Args:
+            token: The access token to verify. If not provided, uses the client's token.
+            **kwargs: Additional keyword arguments to pass to the request.
+            
+        Returns:
+            The user associated with the token.
+        """
+        token = token or self.token
+        if not token:
+            raise ValueError("No token provided and no token set on client")
+        
+        # Create a temporary client with the provided token
+        temp_client = Client(
+            host=self.host,
+            port=self.port,
+            secure=self.secure,
+            token=token,
+        )
+        
+        # Call the VerifyToken method
+        request = user_pb2.VerifyTokenRequest(**kwargs)
+        response = temp_client._call_rpc(temp_client.user_stub.VerifyToken, request)
+        
+        # Update the client's token if the verification was successful
+        self.token = token
+        
+        return User.from_proto(response.user)
+    
+    def close(self):
+        """Close the gRPC channel."""
+        if hasattr(self, 'channel') and self.channel:
+            self.channel.close()
+    
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit."""
+        self.close()
+
+
+# For backward compatibility
+LifeManagerClient = Client

@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package api.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Household represents a household group.
+message Household {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string created_by = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+// HouseholdMember represents a member of a household.
+message HouseholdMember {
+  string id = 1;
+  string household_id = 2;
+  string user_id = 3;
+  string role = 4;  // owner, admin, member
+  google.protobuf.Timestamp joined_at = 5;
+  User user = 6;  // Nested user information
+}
+
+// HouseholdCreate represents the data needed to create a new household.
+message HouseholdCreate {
+  string name = 1;
+  string description = 2;
+}
+
+// HouseholdUpdate represents the data that can be updated for a household.
+message HouseholdUpdate {
+  string id = 1;
+  optional string name = 2;
+  optional string description = 3;
+}
+
+// HouseholdResponse is the response containing a single household.
+message HouseholdResponse {
+  Household household = 1;
+}
+
+// HouseholdListResponse is the response containing a list of households.
+message HouseholdListResponse {
+  repeated Household households = 1;
+  int32 total = 2;
+}
+
+// HouseholdMemberListResponse is the response containing a list of household members.
+message HouseholdMemberListResponse {
+  repeated HouseholdMember members = 1;
+  int32 total = 2;
+}
+
+// HouseholdIdRequest is used to request a household by ID.
+message HouseholdIdRequest {
+  string id = 1;
+}
+
+// AddMemberRequest is used to add a member to a household.
+message AddMemberRequest {
+  string household_id = 1;
+  string user_id = 2;
+  string role = 3;  // owner, admin, member
+}
+
+// UpdateMemberRoleRequest is used to update a member's role in a household.
+message UpdateMemberRoleRequest {
+  string household_id = 1;
+  string user_id = 2;
+  string role = 3;
+}
+
+// RemoveMemberRequest is used to remove a member from a household.
+message RemoveMemberRequest {
+  string household_id = 1;
+  string user_id = 2;
+}
+
+// HouseholdService handles household-related operations.
+service HouseholdService {
+  // Create a new household.
+  rpc CreateHousehold(HouseholdCreate) returns (HouseholdResponse) {}
+  
+  // Get a household by ID.
+  rpc GetHousehold(HouseholdIdRequest) returns (HouseholdResponse) {}
+  
+  // List all households for the current user.
+  rpc ListHouseholds(google.protobuf.Empty) returns (HouseholdListResponse) {}
+  
+  // Update a household.
+  rpc UpdateHousehold(HouseholdUpdate) returns (HouseholdResponse) {}
+  
+  // Delete a household.
+  rpc DeleteHousehold(HouseholdIdRequest) returns (google.protobuf.Empty) {}
+  
+  // Add a member to a household.
+  rpc AddHouseholdMember(AddMemberRequest) returns (HouseholdMember) {}
+  
+  // Update a member's role in a household.
+  rpc UpdateHouseholdMemberRole(UpdateMemberRoleRequest) returns (HouseholdMember) {}
+  
+  // Remove a member from a household.
+  rpc RemoveHouseholdMember(RemoveMemberRequest) returns (google.protobuf.Empty) {}
+  
+  // List all members of a household.
+  rpc ListHouseholdMembers(HouseholdIdRequest) returns (HouseholdMemberListResponse) {}
+}

@@ -1,0 +1,227 @@
+# ${package_name}
+
+${description}
+
+## Installation
+
+```bash
+pip install -e .
+```
+
+## Usage
+
+### Basic Usage
+
+```python
+from ${package_name} import Client
+
+# Create a client instance
+client = Client(host="localhost", port=50051)
+
+# Authenticate
+auth_response = client.authenticate("user@example.com", "password")
+print(f"Authenticated as {auth_response.user.email}")
+
+# Get the current user
+user = client.verify_token()
+print(f"Current user: {user.full_name}")
+
+# Get a user by ID
+user = client.get_user(user_id="user-id-here")
+print(f"User: {user}")
+
+# List users
+user_list = client.list_users(page=1, page_size=10)
+print(f"Found {user_list.total} users")
+for user in user_list.users:
+    print(f"- {user.full_name} ({user.email})")
+
+# Close the client when done
+client.close()
+```
+
+### Using a Context Manager
+
+```python
+from ${package_name} import Client
+
+with Client(host="localhost", port=50051) as client:
+    # Authenticate
+    auth_response = client.authenticate("user@example.com", "password")
+    
+    # Use the client
+    user = client.verify_token()
+    print(f"Current user: {user.full_name}")
+    
+    # The client is automatically closed when the block exits
+```
+
+### Error Handling
+
+```python
+from ${package_name} import Client
+from ${package_name}.exceptions import (
+    GRPCClientAuthenticationError,
+    GRPCClientPermissionError,
+    GRPCClientNotFoundError,
+    GRPCClientError
+)
+
+try:
+    client = Client(host="localhost", port=50051)
+    auth_response = client.authenticate("user@example.com", "wrong-password")
+except GRPCClientAuthenticationError as e:
+    print(f"Authentication failed: {e}")
+except GRPCClientError as e:
+    print(f"gRPC error: {e}")
+else:
+    print(f"Authenticated as {auth_response.user.email}")
+finally:
+    client.close()
+```
+
+## API Reference
+
+### Client
+
+The main client class for interacting with the Life Manager gRPC API.
+
+#### Initialization
+
+```python
+Client(
+    host: str = "localhost",
+    port: int = 50051,
+    secure: bool = False,
+    credentials: Optional[grpc.ChannelCredentials] = None,
+    options: Optional[List[tuple]] = None,
+    token: Optional[str] = None,
+)
+```
+
+**Parameters:**
+- `host`: The server hostname or IP address. Defaults to "localhost".
+- `port`: The server port. Defaults to 50051.
+- `secure`: Whether to use a secure connection (TLS). Defaults to False.
+- `credentials`: Optional gRPC channel credentials. If not provided and `secure=True`,
+  insecure credentials will be used.
+- `options`: Additional gRPC channel options.
+- `token`: Optional JWT token for authentication.
+
+#### Methods
+
+##### User Management
+
+- `authenticate(email: str, password: str) -> AuthResponse`
+  - Authenticate a user and get an access token.
+  
+- `verify_token(token: Optional[str] = None) -> User`
+  - Verify an access token and get the associated user.
+  
+- `get_user(user_id: str) -> User`
+  - Get a user by ID.
+  
+- `get_user_by_email(email: str) -> User`
+  - Get a user by email address.
+  
+- `list_users(page: int = 1, page_size: int = 10) -> UserList`
+  - List users with pagination.
+  
+- `update_user(user_id: str, **kwargs) -> User`
+  - Update a user's information.
+  
+- `delete_user(user_id: str) -> None`
+  - Delete a user.
+
+#### Properties
+
+- `token`: The current authentication token.
+- `channel`: The underlying gRPC channel.
+
+#### Context Manager
+
+The client can be used as a context manager to ensure proper cleanup of resources:
+
+```python
+with Client() as client:
+    # Use the client
+    user = client.verify_token()
+    print(user)
+```
+
+### Models
+
+#### User
+
+Represents a user in the system.
+
+**Attributes:**
+- `id`: The user's unique identifier.
+- `email`: The user's email address.
+- `full_name`: The user's full name.
+- `is_active`: Whether the user account is active.
+- `is_superuser`: Whether the user has superuser privileges.
+- `created_at`: When the user was created.
+- `updated_at`: When the user was last updated.
+
+#### UserList
+
+A paginated list of users.
+
+**Attributes:**
+- `users`: A list of `User` objects.
+- `total`: The total number of users.
+- `page`: The current page number.
+- `page_size`: The number of users per page.
+
+#### AuthResponse
+
+Response from authentication requests.
+
+**Attributes:**
+- `access_token`: The JWT access token.
+- `token_type`: The type of token (usually "bearer").
+- `user`: The authenticated user.
+
+## Error Handling
+
+The client defines several custom exception classes for handling different types of gRPC errors:
+
+- `GRPCClientError`: Base class for all gRPC client errors.
+- `GRPCClientConnectionError`: Raised when there is a connection error.
+- `GRPCClientAuthenticationError`: Raised when authentication fails.
+- `GRPCClientPermissionError`: Raised when the user doesn't have permission.
+- `GRPCClientNotFoundError`: Raised when a requested resource is not found.
+- `GRPCClientValidationError`: Raised when there is a validation error.
+- `GRPCClientAlreadyExistsError`: Raised when trying to create a resource that already exists.
+- `GRPCClientUnavailableError`: Raised when the service is unavailable.
+- `GRPCClientDeadlineExceededError`: Raised when the request deadline is exceeded.
+- `GRPCClientResourceExhaustedError`: Raised when the server is out of resources.
+- `GRPCClientFailedPreconditionError`: Raised when a precondition check fails.
+- `GRPCClientAbortedError`: Raised when the operation was aborted.
+- `GRPCClientOutOfRangeError`: Raised when an operation was attempted past the valid range.
+- `GRPCClientUnimplementedError`: Raised when the requested method is not implemented.
+- `GRPCClientInternalError`: Raised when there is an internal server error.
+- `GRPCClientDataLossError`: Raised when unrecoverable data loss or corruption has occurred.
+- `GRPCClientUnauthenticatedError`: Raised when the request does not have valid authentication credentials.
+
+## Development
+
+### Generating the Client Library
+
+To regenerate the client library after making changes to the Protocol Buffer files:
+
+```bash
+./scripts/generate_grpc_code.sh
+python scripts/generate_client.py
+```
+
+### Running Tests
+
+```bash
+pytest tests/
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

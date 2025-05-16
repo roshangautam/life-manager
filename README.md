@@ -42,6 +42,7 @@ A comprehensive household and personal finance management system built with Fast
 
 - Python 3.8+
 - PostgreSQL 12+
+- gRPC & Protocol Buffers (for gRPC API)
 - Node.js 16+ (for frontend development)
 - Docker & Docker Compose (optional)
 - Git
@@ -215,7 +216,150 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - API Documentation: http://localhost:8000/docs
 - Admin Interface: http://localhost:8000/admin
 
+## gRPC API
+
+Life Manager provides a high-performance gRPC API alongside the REST API. The gRPC API is ideal for performance-critical operations and internal service communication.
+
+### Prerequisites
+
+- Python 3.8+
+- `grpcio` and `grpcio-tools` packages
+- Protocol Buffer compiler (`protoc`)
+
+### Generating gRPC Code
+
+1. Install required tools:
+   ```bash
+   pip install grpcio grpcio-tools
+   ```
+
+2. Generate Python code from .proto files:
+   ```bash
+   ./scripts/generate_grpc_code.sh
+   ```
+
+### Running the gRPC Server
+
+The gRPC server runs alongside the HTTP server by default on port 50051. You can start it using:
+
+```bash
+python -m api
+```
+
+Or using Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+### gRPC Client Library
+
+A Python client library is provided for easy interaction with the gRPC API:
+
+1. Install the client library:
+   ```bash
+   cd clients/python
+   pip install -e .
+   ```
+
+2. Basic usage:
+   ```python
+   from life_manager_client import Client
+   
+   # Create a client instance
+   client = Client(host="localhost", port=50051)
+   
+   try:
+       # Authenticate
+       auth = client.authenticate("user@example.com", "password")
+       print(f"Authenticated as {auth.user.email}")
+       
+       # Get current user
+       user = client.get_me()
+       print(f"User: {user.full_name}")
+       
+   finally:
+       client.close()
+   ```
+
+### gRPC Services
+
+The following gRPC services are available:
+
+- **UserService**: User management and authentication
+- **HouseholdService**: Household operations
+- **FinanceService**: Financial transactions and reporting
+- **CalendarService**: Event and scheduling
+
+### gRPC Reflection
+
+gRPC reflection is enabled by default, allowing tools like `grpcurl` to inspect the API:
+
+```bash
+grpcurl -plaintext localhost:50051 list
+```
+
 ## Development
+
+### gRPC Development
+
+1. To add a new gRPC service:
+   - Create a new `.proto` file in `api/proto/api/v1/`
+   - Define your service and messages
+   - Run `./scripts/generate_grpc_code.sh`
+   - Implement the service in `api/services/grpc/`
+   - Add the service to `api/grpc_server.py`
+
+2. Testing gRPC services:
+   ```bash
+   # Run tests
+   pytest tests/grpc/
+   
+   # Generate coverage report
+   pytest --cov=api.services.grpc tests/grpc/
+   ```
+
+3. Debugging:
+   - Use `grpcurl` for manual API testing:
+     ```bash
+     grpcurl -plaintext -d '{"email":"test@example.com"}' localhost:50051 user.UserService/GetUserByEmail
+     ```
+   - Enable debug logging by setting `LOG_LEVEL=DEBUG`
+
+4. Performance testing:
+   ```bash
+   # Install ghz
+   brew install ghz
+   
+   # Run load test
+   ghz --insecure --proto api/proto/api/v1/user.proto \
+       --call user.UserService.GetUser \
+       -d '{"id":"1"}' \
+       -n 1000 -c 10 \
+       localhost:50051
+   ```
+
+### gRPC Best Practices
+
+1. **Error Handling**:
+   - Use standard gRPC status codes
+   - Include detailed error messages in the status details
+   - Implement proper error handling in the client
+
+2. **Performance**:
+   - Use streaming for large datasets
+   - Implement proper connection pooling
+   - Use deadlines to prevent hanging requests
+
+3. **Security**:
+   - Always use TLS in production
+   - Implement proper authentication and authorization
+   - Validate all inputs
+
+4. **Monitoring**:
+   - Enable gRPC metrics
+   - Use interceptors for logging and monitoring
+   - Track request/response sizes and latencies
 
 ### Project Structure
 
