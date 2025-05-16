@@ -1,0 +1,144 @@
+.budget-overview-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.budget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.budget-header h2 {
+  margin: 0;
+  color: #333;
+}
+
+.timeframe-selector {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.timeframe-selector button {
+  padding: 0.5rem 1rem;
+  background-color: #f0f0f0;
+  color: #666;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.timeframe-selector button.active {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.budget-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.summary-card {
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.summary-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  color: #666;
+}
+
+.summary-card p {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.total-spent {
+  background-color: #f8f9fa;
+}
+
+.total-spent p {
+  color: #333;
+}
+
+.remaining {
+  background-color: #e8f5e9;
+}
+
+.remaining p {
+  color: #27ae60;
+}
+
+.overspent {
+  background-color: #f8d7da;
+}
+
+.overspent p {
+  color: #e74c3c;
+}
+
+.budget-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.budget-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.category-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-info h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.amounts {
+  font-size: 0.9rem;
+}
+
+.spent {
+  font-weight: 600;
+}
+
+.limit {
+  color: #666;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.loading-container {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}

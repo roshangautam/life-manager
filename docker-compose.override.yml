@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./docker/api/Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/__pycache__
+      - /app/.pytest_cache
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONPATH=/app
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  # Uncomment and customize if you have a frontend
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile.dev
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - REACT_APP_API_URL=http://localhost:8000/api/v1
+  #   command: npm start
+
+  # Enable additional development tools
+  pgadmin:
+    ports:
+      - "5050:80"
+
+  redis-commander:
+    ports:
+      - "8081:8081"
+
+  mailhog:
+    ports:
+      - "8025:8025"  # Web UI
+      - "1025:1025"  # SMTP server
