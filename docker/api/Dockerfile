@@ -10,27 +10,27 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=off \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_VERSION=1.4.2 \
-    POETRY_HOME="/opt/poetry" \
-    POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_CREATE=false \
-    PATH="$POETRY_HOME/bin:$PATH"
+    PIP_DEFAULT_TIMEOUT=100
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends build-essential curl && \
-    # Install Poetry
-    curl -sSL https://install.python-poetry.org | python3 - && \
-    # Clean up
+    apt-get install -y --no-install-recommends build-essential && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy only the requirements files first to leverage Docker cache
-COPY pyproject.toml poetry.lock* ./
+# Copy requirements files first to leverage Docker cache
+COPY requirements.txt requirements-grpc.txt requirements-dev.txt ./
 
 # Install Python dependencies
-RUN poetry install --no-dev --no-root
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt -r requirements-grpc.txt && \
+    if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+
+# Copy the rest of the application
+COPY . .
+
+# Install the package in development mode
+RUN pip install -e .
 
 # ==============================================
 # Runtime stage
@@ -50,12 +50,10 @@ RUN groupadd -r appuser && \
     useradd -r -g appuser appuser && \
     chown -R appuser:appuser /app
 
-# Copy only the necessary files from the builder stage
+# Copy from builder
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
-
-# Copy application code
-COPY . .
+COPY --from=builder /app /app
 
 # Create necessary directories and set permissions
 RUN mkdir -p /app/uploads && \
@@ -71,6 +69,9 @@ ENV PYTHONPATH=/app \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/home/appuser/.local/bin:$PATH"
 
+# Expose the ports the app runs on
+EXPOSE 8000  # FastAPI
+EXPOSE 50051  # gRPC
 # Expose the port the app runs on
 EXPOSE 8000
 

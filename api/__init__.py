@@ -9,7 +9,7 @@ __version__ = "0.1.0"
 
 # Import key components for easier access
 from .config import settings
-from .database import engine, SessionLocal, get_db, init_db
+from .models.database import engine, SessionLocal, get_db, init_db
 from . import models, routers, schemas, dependencies
 
 # Initialize the database tables

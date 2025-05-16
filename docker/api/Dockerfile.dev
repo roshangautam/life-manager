@@ -11,30 +11,27 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=off \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_VERSION=1.4.2 \
-    POETRY_HOME="/opt/poetry" \
-    POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_CREATE=false \
-    PATH="$POETRY_HOME/bin:$PATH"
+    PYTHONPATH="/app"
 
 # Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     build-essential \
-    curl \
-    git \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 - \
-    && poetry --version
-
-# Copy only the requirements files first to leverage Docker cache
-COPY pyproject.toml poetry.lock* ./
+# Copy requirements files first to leverage Docker cache
+COPY requirements.txt requirements-grpc.txt requirements-dev.txt ./
 
 # Install Python dependencies
-RUN poetry install --no-root
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt -r requirements-grpc.txt -r requirements-dev.txt
+
+# Copy the rest of the application
+COPY . .
+
+# Install the package in development mode
+RUN pip install -e .
 
 # Create a non-root user
 RUN groupadd -r appuser && \

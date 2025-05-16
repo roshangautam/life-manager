@@ -22,7 +22,7 @@ mkdocs-material>=8.3.0
 mkdocstrings[python]>=0.18.0
 
 # Development tools
-dotenv>=0.21.0
+python-dotenv>=0.21.0
 ipdb>=0.13.9
 ipython>=8.5.0
 pre-commit>=2.20.0
@@ -32,7 +32,6 @@ alembic>=1.7.7
 sqlalchemy-stubs>=0.4
 
 # API testing
-fastapi-testclient>=0.16.0
 requests>=2.28.0
 
 # Code formatting and linting
@@ -45,7 +44,7 @@ flake8-quotes>=3.3.1
 # Type checking
 mypy>=0.971
 typing-extensions>=4.3.0
-types-PyJWT>=2.4.0
+types-PyJWT>=1.7.0
 types-python-dateutil>=2.8.0
 types-requests>=2.28.0
 typing-extensions>=4.3.0

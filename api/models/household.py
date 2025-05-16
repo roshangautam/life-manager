@@ -9,7 +9,19 @@ class Household(Base):
     name = Column(String, unique=True)
     created_by = Column(Integer, ForeignKey("users.id"))
     
-    members = relationship("User", back_populates="household")
+    members = relationship("HouseholdMember", back_populates="household")
+
+class HouseholdMember(Base):
+    __tablename__ = "household_members"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    household_id = Column(Integer, ForeignKey("households.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    role = Column(String, default="member")
+    
+    household = relationship("Household", back_populates="members")
+    user = relationship("User", back_populates="household_memberships")
+
 
 class HouseholdInvitation(Base):
     __tablename__ = "household_invitations"

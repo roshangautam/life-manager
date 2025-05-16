@@ -7,6 +7,12 @@ class TransactionType(str, enum.Enum):
     EXPENSE = "expense"
     INCOME = "income"
 
+class TransactionStatus(str, enum.Enum):
+    PENDING = "pending"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+    FAILED = "failed"
+
 class Category(Base):
     __tablename__ = "categories"
 
@@ -26,6 +32,7 @@ class Transaction(Base):
     amount = Column(Float)
     date = Column(Date)
     type = Column(SQLEnum(TransactionType)) # Redundant? Or useful for direct query?
+    status = Column(SQLEnum(TransactionStatus), default=TransactionStatus.PENDING) # Status of the transaction
     category_id = Column(Integer, ForeignKey("categories.id"))
     user_id = Column(Integer, ForeignKey("users.id")) # Who entered it
     household_id = Column(Integer, ForeignKey("households.id")) # Which household it belongs to

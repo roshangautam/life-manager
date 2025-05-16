@@ -12,7 +12,7 @@ x-shared_environment: &shared_environment
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:15-alpine
+    image: postgres:14-alpine
     container_name: life-manager-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -66,17 +66,26 @@ services:
       FIRST_SUPERUSER_EMAIL: ${FIRST_SUPERUSER_EMAIL:-admin@example.com}
       FIRST_SUPERUSER_PASSWORD: ${FIRST_SUPERUSER_PASSWORD:-ChangeMe123!}
       FIRST_SUPERUSER_FULL_NAME: "${FIRST_SUPERUSER_FULL_NAME:-Admin User}"
+      # gRPC settings
+      GRPC_PORT: 50051
     ports:
       - "${API_PORT:-8000}:8000"
+      - "50051:50051"  # gRPC port
     volumes:
       - .:/app
       - ./uploads:/app/uploads
     env_file:
       - .env
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
     command: >
       sh -c "alembic upgrade head &&
-             uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload"
+             python -m api"
 
   # Frontend Service (if you have a frontend)
   # frontend:
@@ -128,8 +137,8 @@ services:
     image: mailhog/mailhog:latest
     container_name: life-manager-mailhog
     ports:
-      - "${MAILHOG_HTTP_PORT:-8025}:8025"  # Web UI
-      - "${MAILHOG_SMTP_PORT:-1025}:1025"  # SMTP server
+      - "${MAILHOG_HTTP_PORT:-8026}:8025"  # Web UI (changed to 8026 to avoid conflicts)
+      - "${MAILHOG_SMTP_PORT:-1026}:1025"  # SMTP server (changed to 1026 to avoid conflicts)
     restart: unless-stopped
 
 volumes:
