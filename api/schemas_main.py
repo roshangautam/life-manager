@@ -20,6 +20,23 @@ class UserResponse(UserBase):
     class Config:
         orm_mode = True # For SQLAlchemy model conversion
 
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    password: Optional[str] = None
+    is_active: Optional[bool] = None
+    role: Optional[str] = None
+
+class UserInDB(UserBase):
+    id: int
+    is_active: bool
+    role: str
+    hashed_password: Optional[str] = None
+    household_id: Optional[int] = None
+    
+    class Config:
+        orm_mode = True
+
 # Token Schemas
 class Token(BaseModel):
     access_token: str

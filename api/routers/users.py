@@ -8,7 +8,9 @@ from passlib.context import CryptContext
 from pydantic import EmailStr
 from sqlalchemy.orm import Session
 
-from .. import models, schemas
+from .. import models
+# Import from the schemas_main.py file
+from ..schemas_main import UserCreate, UserResponse, Token, TokenData, UserInDB, UserUpdate
 from ..config import settings
 from ..dependencies import get_db, get_current_active_user
 from ..models.user import User, UserRole
@@ -25,8 +27,8 @@ def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).filter(User.email == email).first()
 
 # API Endpoints
-@router.post("", response_model=schemas.UserInDB, status_code=status.HTTP_201_CREATED)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+@router.post("", response_model=UserInDB, status_code=status.HTTP_201_CREATED)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
     """Create a new user."""
     db_user = get_user_by_email(db, email=user.email)
     if db_user:
@@ -49,14 +51,14 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
-@router.get("/me", response_model=schemas.UserInDB)
+@router.get("/me", response_model=UserInDB)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
     """Get current user's details."""
     return current_user
 
-@router.put("/me", response_model=schemas.UserInDB)
+@router.put("/me", response_model=UserInDB)
 async def update_user_me(
-    user_update: schemas.UserUpdate,
+    user_update: UserUpdate,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
@@ -76,7 +78,7 @@ async def update_user_me(
     db.refresh(current_user)
     return current_user
 
-@router.get("", response_model=List[schemas.UserInDB])
+@router.get("", response_model=List[UserInDB])
 async def read_users(
     skip: int = 0,
     limit: int = 100,
@@ -92,7 +94,7 @@ async def read_users(
     users = db.query(User).offset(skip).limit(limit).all()
     return users
 
-@router.get("/{user_id}", response_model=schemas.UserInDB)
+@router.get("/{user_id}", response_model=UserInDB)
 async def read_user(
     user_id: int,
     current_user: User = Depends(get_current_active_user),

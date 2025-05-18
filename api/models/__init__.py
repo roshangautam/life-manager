@@ -11,7 +11,7 @@ from .database import Base, SessionLocal, get_db, init_db
 from .user import User, UserRole
 from .household import Household, HouseholdMember, HouseholdInvitation
 from .finance import Transaction, Category, Budget, TransactionType, TransactionStatus
-from .calendar import Event, EventType, EventStatus
+from .calendar import Event
 
 # Re-export models for easier imports
 __all__ = [
@@ -33,6 +33,4 @@ __all__ = [
     'TransactionType',
     'TransactionStatus',
     'Event',
-    'EventType',
-    'EventStatus',
 ]

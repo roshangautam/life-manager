@@ -6,8 +6,8 @@ import grpc
 from google.protobuf import message as _message
 from grpc import StatusCode
 
-from api.core.config import settings
-from api.core.security import verify_token
+from api.config import settings
+from api.security import decode_access_token
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,11 @@ class AuthInterceptor(grpc.ServerInterceptor):
     def _authenticate(self, token: str) -> Optional[Dict[str, Any]]:
         """Authenticate the token and return the user data."""
         try:
-            return verify_token(token)
+            email = decode_access_token(token)
+            if email:
+                # Return a simple user dict with the email
+                return {"email": email}
+            return None
         except Exception as e:
             logger.warning(f"Token verification failed: {e}")
             return None

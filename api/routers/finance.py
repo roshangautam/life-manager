@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from .. import crud, models, schemas
+from .. import crud, models
+from ..schemas_main import CategoryResponse, CategoryCreate, TransactionType, TransactionResponse, TransactionCreate, BudgetResponse, BudgetCreate
 from ..models.database import get_db
-from .users import get_current_user # Reuse authentication dependency
+from ..dependencies import get_current_user # Import from dependencies, not users
 
 router = APIRouter(
     prefix="/finance",
@@ -14,9 +15,9 @@ router = APIRouter(
 
 # == Categories ==
 
-@router.post("/categories/", response_model=schemas.CategoryResponse)
+@router.post("/categories/", response_model=CategoryResponse)
 def create_category_endpoint(
-    category: schemas.CategoryCreate,
+    category: CategoryCreate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
@@ -31,9 +32,9 @@ def create_category_endpoint(
 
     return crud.create_category(db=db, category=category, household_id=current_user.household_id)
 
-@router.get("/categories/", response_model=List[schemas.CategoryResponse])
+@router.get("/categories/", response_model=List[CategoryResponse])
 def read_categories(
-    type: Optional[schemas.TransactionType] = None, # Allow filtering by type (expense/income)
+    type: Optional[TransactionType] = None, # Allow filtering by type (expense/income)
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
@@ -46,9 +47,9 @@ def read_categories(
 
 # == Transactions (Expenses/Income) ==
 
-@router.post("/transactions/", response_model=schemas.TransactionResponse)
+@router.post("/transactions/", response_model=TransactionResponse)
 def create_transaction_endpoint(
-    transaction: schemas.TransactionCreate,
+    transaction: TransactionCreate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
@@ -74,7 +75,7 @@ def create_transaction_endpoint(
     # The response model should handle nested category details
     return created_transaction
 
-@router.get("/transactions/", response_model=List[schemas.TransactionResponse])
+@router.get("/transactions/", response_model=List[TransactionResponse])
 def read_transactions(
     skip: int = 0,
     limit: int = 100,
@@ -90,9 +91,9 @@ def read_transactions(
 
 # == Budgets ==
 
-@router.post("/budgets/", response_model=schemas.BudgetResponse)
+@router.post("/budgets/", response_model=BudgetResponse)
 def create_or_update_budget_endpoint(
-    budget: schemas.BudgetCreate,
+    budget: BudgetCreate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
@@ -109,7 +110,7 @@ def create_or_update_budget_endpoint(
         )
         
     # Ensure budget is for an expense category (optional rule)
-    if category.type != schemas.TransactionType.EXPENSE:
+    if category.type != TransactionType.EXPENSE:
          raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Budgets can only be set for expense categories"
@@ -126,7 +127,7 @@ def create_or_update_budget_endpoint(
     )
     return created_or_updated_budget
 
-@router.get("/budgets/", response_model=List[schemas.BudgetResponse])
+@router.get("/budgets/", response_model=List[BudgetResponse])
 def read_budgets(
     month: int,
     year: int,

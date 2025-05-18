@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from .. import crud, models, schemas
+from .. import crud, models
+from ..schemas_main import HouseholdResponse, HouseholdCreate
 from ..models.database import get_db
-from .users import get_current_user # Import the dependency
+from ..dependencies import get_current_user # Import from dependencies, not users
 
 router = APIRouter(
     prefix="/households",
@@ -11,9 +12,9 @@ router = APIRouter(
     dependencies=[Depends(get_current_user)] # Protect all routes in this router
 )
 
-@router.post("/", response_model=schemas.HouseholdResponse)
+@router.post("/", response_model=HouseholdResponse)
 async def create_new_household(
-    household: schemas.HouseholdCreate,
+    household: HouseholdCreate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):

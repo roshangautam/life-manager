@@ -15,7 +15,7 @@ from typing import Any, Callable, List, Optional
 import grpc
 import uvicorn
 from fastapi import FastAPI
-from grpc_health.v1 import health_pb2_grpc, health as health_servicer
+from grpc_health.v1 import health_pb2, health_pb2_grpc, health as health_servicer
 from grpc_reflection.v1alpha import reflection
 
 from . import __version__
@@ -128,22 +128,33 @@ class ServerManager:
     async def run(self) -> None:
         """Run both HTTP and gRPC servers concurrently."""
         try:
+            # Start the HTTP server without waiting for it to complete
             http_task = asyncio.create_task(self.start_http_server())
-            grpc_task = asyncio.create_task(self.start_grpc_server())
             
-            # Wait for both servers to complete (which should be never unless there's an error)
+            # If we have gRPC servers, start them too
+            if self.grpc_servers:
+                grpc_task = asyncio.create_task(self.start_grpc_server())
+                tasks = [http_task, grpc_task]
+            else:
+                tasks = [http_task]
+            
+            # Create a simple never-ending task to keep the event loop running
+            keep_alive = asyncio.create_task(self._keep_alive())
+            tasks.append(keep_alive)
+            
+            # Wait for a signal to shut down or for an error in any server
             done, pending = await asyncio.wait(
-                [http_task, grpc_task],
+                tasks,
                 return_when=asyncio.FIRST_COMPLETED,
             )
             
-            # If we get here, one of the servers has stopped
+            # Check for errors in completed tasks
             for task in done:
                 if task.exception():
                     logger.error(f"Server error: {task.exception()}")
                     raise task.exception()
             
-            # Cancel any pending tasks
+            # Cancel pending tasks
             for task in pending:
                 task.cancel()
                 try:
@@ -155,44 +166,56 @@ class ServerManager:
             logger.info("Server shutdown requested")
         except Exception as e:
             logger.exception(f"Unexpected error: {e}")
-            raise
         finally:
             # Ensure all servers are properly shut down
             self._shutdown_event.set()
             logger.info("Server shutdown complete")
+            
+    async def _keep_alive(self):
+        """Keep the event loop running until shutdown is requested."""
+        try:
+            while not self._shutdown_event.is_set():
+                await asyncio.sleep(1)
+        except asyncio.CancelledError:
+            pass
 
 
 def create_servers() -> List[grpc.Server]:
-    """Create and configure gRPC servers."""
-    # Create gRPC server with interceptors
-    interceptors = create_grpc_interceptors()
-    server = grpc.server(
-        futures.ThreadPoolExecutor(max_workers=settings.WORKERS),
-        interceptors=interceptors,
-        options=[
-            ('grpc.max_send_message_length', settings.GRPC_MAX_MESSAGE_LENGTH),
-            ('grpc.max_receive_message_length', settings.GRPC_MAX_MESSAGE_LENGTH),
-            ('grpc.max_metadata_size', settings.GRPC_MAX_METADATA_SIZE),
-            ('grpc.max_concurrent_rpcs', settings.GRPC_MAX_CONCURRENT_RPCS),
-            ('grpc.keepalive_time_ms', settings.GRPC_KEEPALIVE_TIME_MS),
-            ('grpc.keepalive_timeout_ms', settings.GRPC_KEEPALIVE_TIMEOUT_MS),
-            ('grpc.keepalive_min_time_between_pings_ms', settings.GRPC_KEEPALIVE_MIN_TIME_MS),
-            ('grpc.http2.max_pings_without_data', settings.GRPC_HTTP2_MAX_PINGS_WITHOUT_DATA),
-            ('grpc.http2.min_time_between_pings_ms', settings.GRPC_HTTP2_MIN_RECV_PING_INTERVAL_WITHOUT_DATA_SEC * 1000),
-        ]
-    )
-    
-    # Add gRPC services
-    from api.generated.api.v1 import user_pb2_grpc
-    from api.services.grpc import UserService
-    
-    # Create and add UserService
-    user_service = UserService()
-    user_pb2_grpc.add_UserServiceServicer_to_server(user_service, server)
-    
-    logger.info("Registered gRPC services")
-    
-    return [server]
+    """Create gRPC servers with graceful error handling."""
+    try:
+        # Create server
+        server = grpc.server(
+            thread_pool=futures.ThreadPoolExecutor(max_workers=settings.WORKERS),
+            interceptors=create_grpc_interceptors(),
+            options=[
+                ('grpc.max_send_message_length', settings.GRPC_MAX_MESSAGE_LENGTH),
+                ('grpc.max_receive_message_length', settings.GRPC_MAX_MESSAGE_LENGTH),
+                ('grpc.max_metadata_size', settings.GRPC_MAX_METADATA_SIZE),
+                ('grpc.max_concurrent_streams', settings.GRPC_MAX_CONCURRENT_RPCS),
+                ('grpc.http2.min_time_between_pings_ms', settings.GRPC_KEEPALIVE_TIME_MS),
+                ('grpc.http2.min_ping_interval_without_data_ms', settings.GRPC_KEEPALIVE_TIMEOUT_MS),
+                ('grpc.http2.max_pings_without_data', settings.GRPC_HTTP2_MAX_PINGS_WITHOUT_DATA),
+                ('grpc.http2.min_time_between_pings_ms', settings.GRPC_HTTP2_MIN_RECV_PING_INTERVAL_WITHOUT_DATA_SEC * 1000),
+            ]
+        )
+        
+        try:
+            # Add gRPC services
+            from api.generated.api.v1 import user_pb2_grpc
+            from api.services.grpc import UserService
+            
+            # Create and add UserService
+            user_service = UserService()
+            user_pb2_grpc.add_UserServiceServicer_to_server(user_service, server)
+            
+            logger.info("Registered gRPC services")
+            return [server]
+        except ImportError as e:
+            logger.warning(f"Could not import gRPC generated modules: {e}")
+            return []
+    except Exception as e:
+        logger.exception(f"Failed to create gRPC server: {e}")
+        return []
 
 
 def run() -> None:

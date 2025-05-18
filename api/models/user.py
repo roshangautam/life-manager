@@ -25,7 +25,7 @@ class User(Base):
     household_id = Column(Integer, ForeignKey("households.id"), nullable=True)
     
     # Relationships
-    household = relationship("Household", back_populates="members", foreign_keys=[household_id])
+    household = relationship("Household", foreign_keys=[household_id])
     household_memberships = relationship("HouseholdMember", back_populates="user")
     
     def set_password(self, password: str):

@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from .routers import users, households, finance, auth
 from .dependencies import get_db
 from .models import User
+from .models.database import SessionLocal
+from . import schemas_main as schemas
 from typing import Any, Dict, List, Optional, Union
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
@@ -12,7 +14,7 @@ from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
 import time
-from . import __version__, models, schemas
+from . import __version__, models
 from .config import settings
 
 # Initialize FastAPI app
@@ -123,7 +125,7 @@ def create_first_superuser() -> None:
             user = models.User(
                 email=user_in.email,
                 full_name=user_in.full_name,
-                is_superuser=True,
+                role="admin",
                 is_active=True,
             )
             user.set_password(user_in.password)
