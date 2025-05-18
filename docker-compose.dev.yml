@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  # Override frontend service for development
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: life-manager-frontend-dev
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:8000/api/v1
+    depends_on:
+      - api
+    restart: unless-stopped

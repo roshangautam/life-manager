@@ -87,23 +87,20 @@ services:
       sh -c "alembic upgrade head &&
              python -m api"
 
-  # Frontend Service (if you have a frontend)
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   container_name: life-manager-frontend
-  #   ports:
-  #     - "${FRONTEND_PORT:-3000}:3000"
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
-  #   environment:
-  #     - NODE_ENV=development
-  #     - REACT_APP_API_URL=http://localhost:8000/api/v1
-  #   depends_on:
-  #     - api
-  #   restart: unless-stopped
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: life-manager-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=http://localhost:8000/api/v1
+    depends_on:
+      - api
+    restart: unless-stopped
 
   # PGAdmin (optional)
   pgadmin:
