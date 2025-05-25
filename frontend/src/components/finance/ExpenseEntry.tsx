@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   CheckCircleIcon, 
   CurrencyDollarIcon,
@@ -8,22 +8,34 @@ import {
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid';
 
-function ExpenseEntry() {
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('food');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [isRecurring, setIsRecurring] = useState(false);
-  const [recurrenceInterval, setRecurrenceInterval] = useState('monthly');
+type ExpenseCategory = 'food' | 'transportation' | 'housing' | 'utilities' | 'entertainment' | 'shopping' | 'health' | 'other';
+type RecurrenceInterval = 'weekly' | 'bi-weekly' | 'monthly' | 'quarterly' | 'yearly';
 
-  const handleSubmit = (e) => {
+interface ExpenseData {
+  amount: string;
+  description: string;
+  category: ExpenseCategory;
+  date: string;
+  isRecurring: boolean;
+  recurrenceInterval: RecurrenceInterval | null;
+}
+
+function ExpenseEntry(): JSX.Element {
+  const [amount, setAmount] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [category, setCategory] = useState<ExpenseCategory>('food');
+  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
+  const [isRecurring, setIsRecurring] = useState<boolean>(false);
+  const [recurrenceInterval, setRecurrenceInterval] = useState<RecurrenceInterval>('monthly');
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     setIsSubmitting(true);
     
     // TODO: Connect with backend API
-    const expenseData = { 
+    const expenseData: ExpenseData = { 
       amount, 
       description, 
       category, 
@@ -143,7 +155,7 @@ function ExpenseEntry() {
                 id="category"
                 className="form-input mt-1 block w-full"
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
               >
                 <option value="food">Food & Dining</option>
                 <option value="transportation">Transportation</option>

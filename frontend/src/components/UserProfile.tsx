@@ -1,17 +1,24 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './UserProfile.css';
 
-function UserProfile() {
-  const [profile, setProfile] = useState({
+interface Profile {
+  name: string;
+  email: string;
+  role: string;
+  household: string;
+}
+
+function UserProfile(): JSX.Element {
+  const [profile, setProfile] = useState<Profile>({
     name: '',
     email: '',
     role: '',
     household: ''
   });
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedProfile, setEditedProfile] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editedProfile, setEditedProfile] = useState<Profile>({} as Profile);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     // Fetch user profile data from API
@@ -27,7 +34,7 @@ function UserProfile() {
     }, 800);
   }, []);
 
-  const handleEditToggle = () => {
+  const handleEditToggle = (): void => {
     if (isEditing) {
       // Cancel editing
       setIsEditing(false);
@@ -38,7 +45,7 @@ function UserProfile() {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setEditedProfile({
       ...editedProfile,
@@ -46,7 +53,7 @@ function UserProfile() {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
     // TODO: Connect with backend API to update profile

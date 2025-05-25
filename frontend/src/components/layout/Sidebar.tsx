@@ -11,8 +11,32 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
 } from '@heroicons/react/24/outline';
+import type { ComponentType, SVGProps } from 'react';
 
-const navigation = [
+type IconType = ComponentType<SVGProps<SVGSVGElement>>;
+
+interface SubNavItem {
+  name: string;
+  href: string;
+}
+
+interface NavItem {
+  name: string;
+  href?: string;
+  icon: IconType;
+  children?: SubNavItem[];
+}
+
+interface OpenMenusState {
+  [key: string]: boolean;
+}
+
+interface SidebarProps {
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
+}
+
+const navigation: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { 
     name: 'Finance', 
@@ -40,29 +64,29 @@ const navigation = [
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ];
 
-export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
+export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): JSX.Element {
   const location = useLocation();
-  const [openMenus, setOpenMenus] = useState({
+  const [openMenus, setOpenMenus] = useState<OpenMenusState>({
     Finance: true,
     Household: false,
   });
 
-  const toggleMenu = (menuName) => {
+  const toggleMenu = (menuName: string): void => {
     setOpenMenus({
       ...openMenus,
       [menuName]: !openMenus[menuName]
     });
   };
 
-  const isActive = (href) => {
+  const isActive = (href: string): boolean => {
     return location.pathname === href;
   };
 
-  const isActiveParent = (children) => {
-    return children && children.some(child => location.pathname === child.href);
+  const isActiveParent = (children?: SubNavItem[]): boolean => {
+    return children ? children.some(child => location.pathname === child.href) : false;
   };
 
-  const handleLogout = () => {
+  const handleLogout = (): void => {
     localStorage.removeItem('userToken');
     window.location.href = '/login';
   };

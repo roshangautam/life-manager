@@ -1,12 +1,23 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './HouseholdMembers.css';
 
-function HouseholdMembers() {
-  const [members, setMembers] = useState([]);
-  const [email, setEmail] = useState('');
-  const [role, setRole] = useState('member');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+type MemberRole = 'admin' | 'member';
+type MemberStatus = 'active' | 'pending';
+
+interface Member {
+  id: number;
+  name: string;
+  email: string;
+  role: MemberRole;
+  status: MemberStatus;
+}
+
+function HouseholdMembers(): JSX.Element {
+  const [members, setMembers] = useState<Member[]>([]);
+  const [email, setEmail] = useState<string>('');
+  const [role, setRole] = useState<MemberRole>('member');
+  const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Mock data for demonstration
   useEffect(() => {
@@ -20,7 +31,7 @@ function HouseholdMembers() {
     }, 800);
   }, []);
 
-  const handleInvite = (e) => {
+  const handleInvite = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     
     if (!email.trim()) {
@@ -52,7 +63,7 @@ function HouseholdMembers() {
     }, 500);
   };
 
-  const handleRoleChange = (memberId, newRole) => {
+  const handleRoleChange = (memberId: number, newRole: MemberRole): void => {
     // TODO: Connect with backend API
     console.log('Changing role for member', memberId, 'to', newRole);
     
@@ -61,7 +72,7 @@ function HouseholdMembers() {
     ));
   };
 
-  const handleRemove = (memberId) => {
+  const handleRemove = (memberId: number): void => {
     // TODO: Connect with backend API
     console.log('Removing member', memberId);
     
@@ -95,7 +106,7 @@ function HouseholdMembers() {
             <div className="member-actions">
               <select 
                 value={member.role} 
-                onChange={(e) => handleRoleChange(member.id, e.target.value)}
+                onChange={(e) => handleRoleChange(member.id, e.target.value as MemberRole)}
                 disabled={member.status === 'pending'}
               >
                 <option value="admin">Admin</option>
@@ -128,7 +139,7 @@ function HouseholdMembers() {
           </div>
           
           <div className="form-group">
-            <select value={role} onChange={(e) => setRole(e.target.value)}>
+            <select value={role} onChange={(e) => setRole(e.target.value as MemberRole)}>
               <option value="admin">Admin</option>
               <option value="member">Member</option>
             </select>

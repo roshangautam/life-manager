@@ -11,16 +11,42 @@ import {
   Cog6ToothIcon
 } from '@heroicons/react/24/outline';
 
-function Dashboard() {
+// Define interfaces for type safety
+interface User {
+  name: string;
+  household: string;
+}
+
+interface Category {
+  name: string;
+  amount: number;
+  budget: number;
+  color: string;
+}
+
+interface FinanceData {
+  monthlyBudget: number;
+  currentSpending: number;
+  categories: Category[];
+}
+
+interface Event {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+}
+
+function Dashboard(): JSX.Element {
   const navigate = useNavigate();
   
-  const [user] = useState({
+  const [user] = useState<User>({
     name: 'John Doe',
     household: 'Doe Family'
   });
 
   // Mock data for dashboard widgets
-  const financeData = {
+  const financeData: FinanceData = {
     monthlyBudget: 5000,
     currentSpending: 3245,
     categories: [
@@ -30,15 +56,15 @@ function Dashboard() {
     ]
   };
 
-  const upcomingEvents = [
+  const upcomingEvents: Event[] = [
     { id: 1, title: 'Doctor Appointment', date: '2025-05-20', time: '10:00 AM' },
     { id: 2, title: 'School Meeting', date: '2025-05-24', time: '3:30 PM' },
     { id: 3, title: 'Family Dinner', date: '2025-05-25', time: '7:00 PM' }
   ];
 
   // Calculate percentage
-  const spendingPercentage = Math.round((financeData.currentSpending / financeData.monthlyBudget) * 100);
-  const isOverBudget = spendingPercentage > 100;
+  const spendingPercentage: number = Math.round((financeData.currentSpending / financeData.monthlyBudget) * 100);
+  const isOverBudget: boolean = spendingPercentage > 100;
 
   return (
     <div className="space-y-6">

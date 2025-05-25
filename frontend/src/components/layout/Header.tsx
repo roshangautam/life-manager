@@ -9,12 +9,16 @@ import {
   ArrowRightOnRectangleIcon 
 } from '@heroicons/react/24/outline';
 
-function classNames(...classes) {
+interface HeaderProps {
+  setSidebarOpen: (open: boolean) => void;
+}
+
+function classNames(...classes: (string | boolean | undefined)[]): string {
   return classes.filter(Boolean).join(' ');
 }
 
-export default function Header({ setSidebarOpen }) {
-  const handleLogout = () => {
+export default function Header({ setSidebarOpen }: HeaderProps): JSX.Element {
+  const handleLogout = (): void => {
     localStorage.removeItem('userToken');
     window.location.href = '/login';
   };

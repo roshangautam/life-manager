@@ -8,16 +8,37 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 
-function ExpenseList() {
-  const [expenses, setExpenses] = useState([]);
-  const [filter, setFilter] = useState('all');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [sortField, setSortField] = useState('date');
-  const [sortDirection, setSortDirection] = useState('desc');
+// Define TypeScript interfaces
+interface Expense {
+  id: number;
+  amount: number;
+  description: string;
+  category: string;
+  date: string;
+}
+
+type SortField = 'date' | 'amount' | 'description' | 'category';
+type SortDirection = 'asc' | 'desc';
+type CategoryFilter = 'all' | 'food' | 'transportation' | 'housing' | 'utilities' | 'entertainment' | 'shopping' | 'health' | 'other';
+
+interface CategoryColorMap {
+  [key: string]: string;
+}
+
+interface CategoryLabelMap {
+  [key: string]: string;
+}
+
+function ExpenseList(): JSX.Element {
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [filter, setFilter] = useState<CategoryFilter>('all');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [sortField, setSortField] = useState<SortField>('date');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   // Mock data for demonstration
   useEffect(() => {

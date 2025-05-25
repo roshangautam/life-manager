@@ -1,11 +1,28 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './RecurringExpenses.css';
 
-function RecurringExpenses() {
-  const [recurringExpenses, setRecurringExpenses] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [formData, setFormData] = useState({
+type Frequency = 'daily' | 'weekly' | 'bi-weekly' | 'monthly' | 'quarterly' | 'yearly';
+
+interface RecurringExpense {
+  id: number;
+  description: string;
+  amount: number;
+  frequency: Frequency;
+  nextDate: string;
+}
+
+interface FormData {
+  description: string;
+  amount: string | number;
+  frequency: Frequency;
+  startDate: string;
+}
+
+function RecurringExpenses(): JSX.Element {
+  const [recurringExpenses, setRecurringExpenses] = useState<RecurringExpense[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showAddForm, setShowAddForm] = useState<boolean>(false);
+  const [formData, setFormData] = useState<FormData>({
     description: '',
     amount: '',
     frequency: 'monthly',
@@ -14,7 +31,7 @@ function RecurringExpenses() {
   
   // Mock data for demonstration
   useEffect(() => {
-    const mockData = [
+    const mockData: RecurringExpense[] = [
       { id: 1, description: 'Netflix Subscription', amount: 15.99, frequency: 'monthly', nextDate: '2025-06-01' },
       { id: 2, description: 'Gym Membership', amount: 45.00, frequency: 'monthly', nextDate: '2025-06-05' },
       { id: 3, description: 'Car Insurance', amount: 120.00, frequency: 'monthly', nextDate: '2025-06-15' },
@@ -27,13 +44,13 @@ function RecurringExpenses() {
     }, 800);
   }, []);
 
-  const formatDate = (dateStr) => {
+  const formatDate = (dateStr: string): string => {
     if (!dateStr) return 'N/A';
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateStr).toLocaleDateString(undefined, options);
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -41,13 +58,14 @@ function RecurringExpenses() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
-    const newExpense = {
+    const newExpense: RecurringExpense = {
       id: Date.now(),
-      ...formData,
+      description: formData.description,
+      frequency: formData.frequency,
       nextDate: formData.startDate,
-      amount: parseFloat(formData.amount) || 0
+      amount: parseFloat(formData.amount.toString()) || 0
     };
     
     setRecurringExpenses(prev => [...prev, newExpense]);
@@ -60,7 +78,7 @@ function RecurringExpenses() {
     });
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: number): void => {
     if (window.confirm('Are you sure you want to delete this recurring expense?')) {
       setRecurringExpenses(prev => prev.filter(exp => exp.id !== id));
     }

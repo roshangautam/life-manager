@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import './HouseholdSettings.css';
 
-function HouseholdSettings() {
-  const [householdName, setHouseholdName] = useState('Doe Family');
-  const [currency, setCurrency] = useState('USD');
-  const [timezone, setTimezone] = useState('America/Los_Angeles');
-  const [isSaving, setIsSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
+type Currency = 'USD' | 'EUR' | 'GBP' | 'JPY';
+type Timezone = 'America/Los_Angeles' | 'America/New_York' | 'America/Chicago' | 'America/Denver' | 'Europe/London';
 
-  const handleSubmit = (e) => {
+function HouseholdSettings(): JSX.Element {
+  const [householdName, setHouseholdName] = useState<string>('Doe Family');
+  const [currency, setCurrency] = useState<Currency>('USD');
+  const [timezone, setTimezone] = useState<Timezone>('America/Los_Angeles');
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     setIsSaving(true);
     
@@ -51,7 +54,7 @@ function HouseholdSettings() {
           <select 
             id="currency"
             value={currency}
-            onChange={(e) => setCurrency(e.target.value)}
+            onChange={(e) => setCurrency(e.target.value as Currency)}
           >
             <option value="USD">US Dollar ($)</option>
             <option value="EUR">Euro (€)</option>
@@ -65,7 +68,7 @@ function HouseholdSettings() {
           <select 
             id="timezone"
             value={timezone}
-            onChange={(e) => setTimezone(e.target.value)}
+            onChange={(e) => setTimezone(e.target.value as Timezone)}
           >
             <option value="America/Los_Angeles">Pacific Time (PT)</option>
             <option value="America/New_York">Eastern Time (ET)</option>

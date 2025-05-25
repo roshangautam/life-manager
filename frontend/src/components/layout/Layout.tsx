@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useState, ReactNode } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 
-export default function Layout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+interface LayoutProps {
+  children: ReactNode;
+}
+
+export default function Layout({ children }: LayoutProps): JSX.Element {
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
 
   return (
     <div className="min-h-screen bg-gray-50">

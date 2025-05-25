@@ -2,31 +2,36 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 
-function Navbar({ isAuthenticated, setIsAuthenticated }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isFinanceOpen, setIsFinanceOpen] = useState(false);
-  const navigate = useNavigate();
-  const financeMenuRef = useRef(null);
+interface NavbarProps {
+  isAuthenticated: boolean;
+  setIsAuthenticated: (value: boolean) => void;
+}
 
-  const handleLogout = () => {
+const Navbar: React.FC<NavbarProps> = ({ isAuthenticated, setIsAuthenticated }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isFinanceOpen, setIsFinanceOpen] = useState<boolean>(false);
+  const navigate = useNavigate();
+  const financeMenuRef = useRef<HTMLLIElement>(null);
+
+  const handleLogout = (): void => {
     localStorage.removeItem('userToken');
     setIsAuthenticated(false);
     navigate('/login');
   };
 
-  const toggleMobileMenu = () => {
+  const toggleMobileMenu = (): void => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  const toggleFinanceMenu = (e) => {
+  const toggleFinanceMenu = (e: React.MouseEvent): void => {
     e.stopPropagation();
     setIsFinanceOpen(!isFinanceOpen);
   };
 
   // Close finance menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (financeMenuRef.current && !financeMenuRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (financeMenuRef.current && !financeMenuRef.current.contains(event.target as Node)) {
         setIsFinanceOpen(false);
       }
     };
@@ -37,7 +42,7 @@ function Navbar({ isAuthenticated, setIsAuthenticated }) {
     };
   }, []);
 
-  const closeMobileMenu = () => {
+  const closeMobileMenu = (): void => {
     setIsMobileMenuOpen(false);
     setIsFinanceOpen(false);
   };
@@ -118,6 +123,6 @@ function Navbar({ isAuthenticated, setIsAuthenticated }) {
       </div>
     </nav>
   );
-}
+};
 
 export default Navbar;

@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import Layout from './components/layout/Layout';
 import UserRegistration from './components/UserRegistration';
 import UserLogin from './components/UserLogin';
@@ -15,8 +15,18 @@ import BudgetSettings from './components/finance/BudgetSettings';
 import AnalyticsDashboard from './components/finance/AnalyticsDashboard';
 import RecurringExpenses from './components/finance/RecurringExpenses';
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+// Define interface for props passed to UserLogin component
+interface UserLoginProps {
+  setIsAuthenticated: (isAuthenticated: boolean) => void;
+}
+
+// Define interface for ProtectedRoute props
+interface ProtectedRouteProps {
+  children: ReactNode;
+}
+
+function App(): JSX.Element {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   
   useEffect(() => {
     // Check if user is logged in
@@ -27,7 +37,7 @@ function App() {
   }, []);
 
   // Protected route component with Layout
-  const ProtectedRoute = ({ children }) => {
+  const ProtectedRoute = ({ children }: ProtectedRouteProps): JSX.Element => {
     if (!isAuthenticated) {
       return <Navigate to="/login" />;
     }

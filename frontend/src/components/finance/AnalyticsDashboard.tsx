@@ -1,14 +1,39 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './AnalyticsDashboard.css';
 
-function AnalyticsDashboard() {
-  const [timeframe, setTimeframe] = useState('month');
-  const [chartData, setChartData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+type Timeframe = 'month' | 'week';
+type ExpenseCategory = 'food' | 'transportation' | 'housing' | 'utilities' | 'entertainment' | 'shopping' | 'health' | 'other';
+
+interface SpendingByCategory {
+  category: ExpenseCategory;
+  amount: number;
+}
+
+interface MonthlyTrend {
+  month: string;
+  amount: number;
+}
+
+interface BudgetComparison {
+  totalSpent: number;
+  totalBudget: number;
+  remaining: number;
+}
+
+interface ChartData {
+  spendingByCategory: SpendingByCategory[];
+  monthlyTrends: MonthlyTrend[];
+  budgetComparison: BudgetComparison;
+}
+
+function AnalyticsDashboard(): JSX.Element {
+  const [timeframe, setTimeframe] = useState<Timeframe>('month');
+  const [chartData, setChartData] = useState<ChartData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Mock data for demonstration
   useEffect(() => {
-    const mockData = {
+    const mockData: ChartData = {
       spendingByCategory: [
         { category: 'food', amount: 325 },
         { category: 'transportation', amount: 180 },
@@ -39,8 +64,8 @@ function AnalyticsDashboard() {
     }, 1000);
   }, [timeframe]);
 
-  const getCategoryName = (category) => {
-    const names = {
+  const getCategoryName = (category: ExpenseCategory): string => {
+    const names: Record<ExpenseCategory, string> = {
       food: 'Food',
       transportation: 'Transport',
       housing: 'Housing',

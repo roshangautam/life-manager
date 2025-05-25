@@ -1,18 +1,33 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import './UserRegistration.css';
 
-function UserRegistration() {
-  const [formData, setFormData] = useState({
+interface FormData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  name: string;
+}
+
+interface Errors {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  name?: string;
+  submit?: string;
+}
+
+function UserRegistration(): JSX.Element {
+  const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
     confirmPassword: '',
     name: ''
   });
   
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Errors>({});
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -20,8 +35,8 @@ function UserRegistration() {
     });
   };
 
-  const validate = () => {
-    const newErrors = {};
+  const validate = (): Errors => {
+    const newErrors: Errors = {};
     
     if (!formData.email) {
       newErrors.email = 'Email is required';
@@ -46,7 +61,7 @@ function UserRegistration() {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
     const newErrors = validate();

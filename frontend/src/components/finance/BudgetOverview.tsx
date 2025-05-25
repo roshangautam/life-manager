@@ -1,15 +1,23 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './BudgetOverview.css';
 
-function BudgetOverview() {
-  const [budgets, setBudgets] = useState([]);
-  const [expenses, setExpenses] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [timeframe, setTimeframe] = useState('month');
+type ExpenseCategory = 'food' | 'transportation' | 'housing' | 'utilities' | 'entertainment' | 'shopping' | 'health' | 'other';
+type Timeframe = 'month' | 'week';
+
+interface Budget {
+  category: ExpenseCategory;
+  limit: number;
+  spent: number;
+}
+
+function BudgetOverview(): JSX.Element {
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [timeframe, setTimeframe] = useState<Timeframe>('month');
 
   // Mock data for demonstration
   useEffect(() => {
-    const mockBudgets = [
+    const mockBudgets: Budget[] = [
       { category: 'food', limit: 400, spent: 325 },
       { category: 'transportation', limit: 200, spent: 180 },
       { category: 'housing', limit: 1200, spent: 1200 },
@@ -26,8 +34,8 @@ function BudgetOverview() {
     }, 800);
   }, []);
 
-  const getCategoryName = (category) => {
-    const names = {
+  const getCategoryName = (category: ExpenseCategory): string => {
+    const names: Record<ExpenseCategory, string> = {
       food: 'Food & Dining',
       transportation: 'Transportation',
       housing: 'Housing',
@@ -40,7 +48,7 @@ function BudgetOverview() {
     return names[category] || category;
   };
 
-  const getProgressColor = (spent, limit) => {
+  const getProgressColor = (spent: number, limit: number): string => {
     const percentage = (spent / limit) * 100;
     if (percentage > 100) return '#e74c3c';
     if (percentage > 75) return '#f39c12';

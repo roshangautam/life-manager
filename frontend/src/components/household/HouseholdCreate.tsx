@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import './HouseholdCreate.css';
 
-function HouseholdCreate() {
-  const [householdName, setHouseholdName] = useState('');
-  const [error, setError] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
-  const [success, setSuccess] = useState(false);
+function HouseholdCreate(): JSX.Element {
+  const [householdName, setHouseholdName] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
     if (!householdName.trim()) {

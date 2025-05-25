@@ -1,15 +1,22 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './BudgetSettings.css';
 
-function BudgetSettings() {
-  const [budgets, setBudgets] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
+type ExpenseCategory = 'food' | 'transportation' | 'housing' | 'utilities' | 'entertainment' | 'shopping' | 'health' | 'other';
+
+interface Budget {
+  category: ExpenseCategory;
+  limit: number;
+}
+
+function BudgetSettings(): JSX.Element {
+  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
 
   // Mock data for demonstration
   useEffect(() => {
-    const mockBudgets = [
+    const mockBudgets: Budget[] = [
       { category: 'food', limit: 400 },
       { category: 'transportation', limit: 200 },
       { category: 'housing', limit: 1200 },
@@ -26,13 +33,13 @@ function BudgetSettings() {
     }, 800);
   }, []);
 
-  const handleLimitChange = (category, value) => {
+  const handleLimitChange = (category: ExpenseCategory, value: string): void => {
     setBudgets(budgets.map(budget => 
       budget.category === category ? { ...budget, limit: Number(value) } : budget
     ));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     setIsSaving(true);
     
@@ -47,8 +54,8 @@ function BudgetSettings() {
     }, 1000);
   };
 
-  const getCategoryName = (category) => {
-    const names = {
+  const getCategoryName = (category: ExpenseCategory): string => {
+    const names: Record<ExpenseCategory, string> = {
       food: 'Food & Dining',
       transportation: 'Transportation',
       housing: 'Housing',

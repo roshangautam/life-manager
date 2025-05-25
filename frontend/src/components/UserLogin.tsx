@@ -1,18 +1,33 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UserLogin.css';
 
-function UserLogin({ setIsAuthenticated }) {
+interface UserLoginProps {
+  setIsAuthenticated: (isAuthenticated: boolean) => void;
+}
+
+interface FormData {
+  email: string;
+  password: string;
+}
+
+interface Errors {
+  email?: string;
+  password?: string;
+  submit?: string;
+}
+
+function UserLogin({ setIsAuthenticated }: UserLoginProps): JSX.Element {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     email: '',
     password: ''
   });
   
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Errors>({});
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -20,8 +35,8 @@ function UserLogin({ setIsAuthenticated }) {
     });
   };
 
-  const validate = () => {
-    const newErrors = {};
+  const validate = (): Errors => {
+    const newErrors: Errors = {};
     
     if (!formData.email) {
       newErrors.email = 'Email is required';
@@ -34,7 +49,7 @@ function UserLogin({ setIsAuthenticated }) {
     return newErrors;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
     const newErrors = validate();
@@ -52,7 +67,7 @@ function UserLogin({ setIsAuthenticated }) {
       setTimeout(() => {
         // Store token in localStorage (in a real app)
         localStorage.setItem('userToken', 'fake-jwt-token');
-        setIsAuthenticated(true); // Update authentication state in App.jsx
+        setIsAuthenticated(true); // Update authentication state in App.tsx
         // Redirect to profile page
         navigate('/profile');
       }, 1000);
