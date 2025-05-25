@@ -87,14 +87,14 @@ services:
       sh -c "alembic upgrade head &&
              python -m api"
 
-  # Frontend Service
-  frontend:
+  # App Service
+  app:
     build:
-      context: ./frontend
+      context: ./app
       dockerfile: Dockerfile
-    container_name: life-manager-frontend
+    container_name: life-manager-app
     ports:
-      - "${FRONTEND_PORT:-3000}:80"
+      - "${APP_PORT:-3000}:80"
     environment:
       - NODE_ENV=production
       - VITE_API_URL=http://localhost:8000/api/v1

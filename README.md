@@ -110,11 +110,11 @@ A comprehensive household and personal finance management system built with Fast
    uvicorn api.main:app --reload
    ```
 
-#### Frontend Setup
+#### App Setup
 
-1. Navigate to the frontend directory:
+1. Navigate to the app directory:
    ```bash
-   cd frontend
+   cd app
    ```
 
 2. Install dependencies:
@@ -130,7 +130,7 @@ A comprehensive household and personal finance management system built with Fast
 ## 📚 Documentation
 
 - [API Documentation](http://localhost:8000/docs) (available after starting the backend)
-- [Frontend Documentation](./frontend/README.md)
+- [App Documentation](./app/README.md)
 - [Architecture Decision Records](./docs/adr/)
 - [API Reference](./docs/API_REFERENCE.md)
 
@@ -197,11 +197,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
    uvicorn api.main:app --reload
    ```
 
-### 3. Set up the frontend
+### 3. Set up the app
 
-1. Navigate to the frontend directory:
+1. Navigate to the app directory:
    ```bash
-   cd frontend
+   cd app
    ```
 
 2. Install Node.js dependencies:
@@ -376,7 +376,7 @@ LifeManager/
 │   ├── config.py           # Application configuration
 │   ├── database.py         # Database configuration
 │   └── main.py             # FastAPI application
-├── frontend/               # Frontend React application
+├── app/                    # App React application
 ├── migrations/             # Database migrations
 ├── tests/                  # Test files
 ├── .env.example            # Example environment variables
@@ -393,8 +393,8 @@ LifeManager/
 # Run backend tests
 pytest
 
-# Run frontend tests
-cd frontend
+# Run app tests
+cd app
 npm test
 ```
 

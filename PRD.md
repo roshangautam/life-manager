@@ -27,7 +27,7 @@ Centralized platform for household management including financial tracking, sche
 
 ## Technical Stack
 - **Backend**: FastAPI
-- **Frontend**: React/Next.js
+- **App**: React/Next.js
 - **Database**: PostgreSQL
 - **Infra**: Docker
 

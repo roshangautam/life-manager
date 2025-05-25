@@ -29,13 +29,13 @@ services:
       sh -c "alembic upgrade head &&
              python -m api"
 
-  # Uncomment and customize if you have a frontend
-  # frontend:
+  # Uncomment and customize if you have an app
+  # app:
   #   build:
-  #     context: ./frontend
+  #     context: ./app
   #     dockerfile: Dockerfile.dev
   #   volumes:
-  #     - ./frontend:/app
+  #     - ./app:/app
   #     - /app/node_modules
   #   ports:
   #     - "3000:3000"

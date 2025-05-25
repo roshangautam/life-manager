@@ -1,10 +1,10 @@
-# Life Manager Frontend
+# Life Manager App
 
 [![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.3.5-646CFF.svg?logo=vite)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.3.5-38B2AC.svg?logo=tailwind-css)](https://tailwindcss.com/)
 
-A modern, responsive frontend for the Life Manager application built with React, Vite, and Tailwind CSS.
+A modern, responsive app for the Life Manager application built with React, Vite, and Tailwind CSS.
 
 ## 🎨 UI Features
 
@@ -24,9 +24,9 @@ A modern, responsive frontend for the Life Manager application built with React,
 
 ### Installation
 
-1. Navigate to the frontend directory:
+1. Navigate to the app directory:
    ```bash
-   cd frontend
+   cd app
    ```
 
 2. Install dependencies:

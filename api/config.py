@@ -45,7 +45,7 @@ class Settings(BaseSettings):
 
     # CORS
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
-        "http://localhost:3000",  # Frontend URL
+        "http://localhost:3000",  # App URL
         "http://localhost:8000",  # Backend API URL
         "http://localhost:50051",  # gRPC Web URL
         "http://localhost:8080",  # gRPC Web Proxy

@@ -1,0 +1,6 @@
+name: dev-docs
+version: 0.0.1
+schema: 1
+docs:
+  - name: Source Code
+    startUrl: https://github.com/roshangautam/life-manager
