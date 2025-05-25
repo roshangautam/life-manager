@@ -1,9 +1,10 @@
+import os
+from typing import Generator
+
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
-from typing import Generator
-import os
-from dotenv import load_dotenv
+from sqlalchemy.orm import Session, sessionmaker
 
 # Load environment variables
 load_dotenv()
@@ -13,7 +14,10 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
 
 # Create SQLAlchemy engine
 engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+    DATABASE_URL,
+    connect_args=(
+        {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+    ),
 )
 
 # Create a SessionLocal class for database sessions
@@ -21,6 +25,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Base class for models
 Base = declarative_base()
+
 
 def get_db() -> Generator[Session, None, None]:
     """
@@ -31,6 +36,7 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
 
 def init_db() -> None:
     """

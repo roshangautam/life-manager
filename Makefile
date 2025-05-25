@@ -1,9 +1,9 @@
 .PHONY: help install format lint test coverage clean docker-up docker-down docker-restart docker-logs db-migrate db-upgrade db-downgrade db-revision db-show db-reset
 
 # Define variables
-DOCKER_COMPOSE := docker-compose -f docker-compose.yml -f docker-compose.override.yml
-DOCKER_COMPOSE_PROD := docker-compose -f docker-compose.yml -f docker-compose.prod.yml
-DOCKER_COMPOSE_TEST := docker-compose -f docker-compose.yml -f docker-compose.test.yml
+DOCKER_COMPOSE := docker compose -f docker-compose.yml -f docker-compose.override.yml
+DOCKER_COMPOSE_PROD := docker compose -f docker-compose.yml -f docker-compose.prod.yml
+DOCKER_COMPOSE_TEST := docker compose -f docker-compose.yml -f docker-compose.test.yml
 
 # Default target when you just type 'make'
 help:
@@ -28,7 +28,7 @@ help:
 # Install development dependencies
 install:
 	poetry install
-	pre-commit install
+	poetry run pre-commit install
 
 # Format code
 format:

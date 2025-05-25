@@ -55,7 +55,7 @@ def copy_generated_files():
     # Create the proto directory
     proto_dir = CLIENT_DIR / "proto"
     proto_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Copy the generated proto files
     for root, _, files in os.walk(SRC_DIR):
         for file in files:
@@ -63,13 +63,13 @@ def copy_generated_files():
                 src_path = Path(root) / file
                 rel_path = src_path.relative_to(SRC_DIR)
                 dest_path = proto_dir / rel_path
-                
+
                 # Create destination directory if it doesn't exist
                 dest_path.parent.mkdir(parents=True, exist_ok=True)
-                
+
                 # Copy the file
                 shutil.copy2(src_path, dest_path)
-    
+
     # Create __init__.py files in all subdirectories
     for root, dirs, _ in os.walk(CLIENT_DIR):
         for dir_name in dirs:
@@ -83,10 +83,10 @@ def render_template(template_name: str, context: dict) -> str:
     template_path = TEMPLATES_DIR / template_name
     if not template_path.exists():
         return ""
-    
+
     with open(template_path, "r") as f:
         template_content = f.read()
-    
+
     template = Template(template_content)
     return template.safe_substitute(context)
 
@@ -95,34 +95,34 @@ def generate_client_files():
     """Generate client library files from templates."""
     # Create the client package directory
     clean_directory(CLIENT_DIR)
-    
+
     # Copy generated proto files
     copy_generated_files()
-    
+
     # Generate files from templates
     for template_file in TEMPLATE_FILES:
         # Determine the output file name
         output_file = template_file.replace(".tmpl", "")
         output_path = CLIENT_DIR / output_file
-        
+
         # Render the template
         content = render_template(template_file, CONTEXT)
         if content:
             with open(output_path, "w") as f:
                 f.write(content)
-    
+
     # Create a README.md for the client
     readme_content = render_template("README.md.tmpl", CONTEXT)
     if readme_content:
         with open(CLIENT_DIR / "README.md", "w") as f:
             f.write(readme_content)
-    
+
     print(f"Generated client library in {CLIENT_DIR}")
 
 
 if __name__ == "__main__":
     # Create the templates directory if it doesn't exist
     TEMPLATES_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     # Generate the client library
     generate_client_files()

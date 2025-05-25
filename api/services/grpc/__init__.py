@@ -8,6 +8,6 @@ from .base import BaseGRPCService
 from .user_service import UserService
 
 __all__ = [
-    'BaseGRPCService',
-    'UserService',
+    "BaseGRPCService",
+    "UserService",
 ]

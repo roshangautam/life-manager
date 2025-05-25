@@ -1,3 +1,3 @@
-from . import auth, users, households, finance
+from . import auth, finance, households, users
 
 # This file makes the routers directory a Python package

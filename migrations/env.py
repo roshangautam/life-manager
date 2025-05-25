@@ -1,11 +1,11 @@
 import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
-from api.models.database import Base
+from sqlalchemy import engine_from_config, pool
+from sqlalchemy.ext.declarative import declarative_base
+# Base class for declarative models
+Base = declarative_base()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -60,6 +60,7 @@ def run_migrations_online() -> None:
     # Use DATABASE_URL from environment if available, otherwise use config
     if os.getenv("DATABASE_URL"):
         from sqlalchemy import create_engine
+
         connectable = create_engine(os.getenv("DATABASE_URL"), poolclass=pool.NullPool)
     else:
         connectable = engine_from_config(
@@ -73,7 +74,7 @@ def run_migrations_online() -> None:
             connection=connection,
             target_metadata=target_metadata,
             compare_type=True,
-            render_as_batch=True
+            render_as_batch=True,
         )
 
         with context.begin_transaction():

@@ -1,21 +1,22 @@
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from .routers import users, households, finance, auth
-from .dependencies import get_db
-from .models import User
-from .models.database import SessionLocal
-from . import schemas_main as schemas
+import time
 from typing import Any, Dict, List, Optional, Union
+
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
-import time
+
 from . import __version__, models
+from . import schemas_main as schemas
 from .config import settings
+from .dependencies import get_db
+from .models import User
+from .models.database import SessionLocal
+from .routers import auth, finance, households, users
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -37,6 +38,7 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_headers=["*"],
     )
 
+
 # Add middleware for request timing
 class ProcessTimeMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -45,6 +47,7 @@ class ProcessTimeMiddleware(BaseHTTPMiddleware):
         process_time = time.time() - start_time
         response.headers["X-Process-Time"] = str(process_time)
         return response
+
 
 app.add_middleware(ProcessTimeMiddleware)
 
@@ -70,6 +73,7 @@ app.include_router(
     tags=["auth"],
 )
 
+
 # Custom exception handlers
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
@@ -78,6 +82,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
         content={"detail": exc.detail},
         headers=exc.headers if hasattr(exc, "headers") else None,
     )
+
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(
@@ -88,11 +93,13 @@ async def validation_exception_handler(
         content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
     )
 
+
 # Health check endpoint
 @app.get("/health", tags=["health"])
 async def health_check() -> Dict[str, str]:
     """Health check endpoint for load balancers and monitoring."""
     return {"status": "ok"}
+
 
 # Root endpoint
 @app.get("/", tags=["root"])
@@ -104,6 +111,7 @@ async def root() -> Dict[str, str]:
         "docs": "/docs",
         "redoc": "/redoc",
     }
+
 
 # Create first superuser on startup
 @app.on_event("startup")
