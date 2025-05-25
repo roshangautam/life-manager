@@ -50,7 +50,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: ./docker/api/Dockerfile
+      dockerfile: ./api/Dockerfile
     container_name: life-manager-api
     depends_on:
       postgres:
