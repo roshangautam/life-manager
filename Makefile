@@ -16,6 +16,7 @@ help:
 	@echo "  clean      - Clean up Python and build artifacts"
 	@echo "  docker-up  - Start all services in detached mode"
 	@echo "  docker-down - Stop and remove all containers"
+	@echo "  docker-clean - Clean up docker containers"
 	@echo "  docker-restart - Restart all services"
 	@echo "  docker-logs - Show logs for all services"
 	@echo "  db-migrate - Create a new database migration"
@@ -67,6 +68,10 @@ docker-up:
 # Stop and remove all containers
 docker-down:
 	$(DOCKER_COMPOSE) down
+
+# Stop and remove all containers
+docker-clean:
+	docker system prune -a
 
 # Restart all services
 docker-restart: docker-down docker-up

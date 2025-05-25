@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(mv:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(yarn dev)",
+      "Bash(timeout:*)",
+      "Bash(gtimeout:*)",
+      "Bash(yarn build)"
     ],
     "deny": []
   }

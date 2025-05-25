@@ -57,7 +57,7 @@ function ExpenseList(): JSX.Element {
   }, []);
 
   // Handle sorting and filtering
-  const handleSort = (field) => {
+  const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -93,7 +93,7 @@ function ExpenseList(): JSX.Element {
     let comparison = 0;
     
     if (sortField === 'date') {
-      comparison = new Date(a.date) - new Date(b.date);
+      comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
     } else if (sortField === 'amount') {
       comparison = a.amount - b.amount;
     } else if (sortField === 'description') {
@@ -107,12 +107,12 @@ function ExpenseList(): JSX.Element {
 
   const totalAmount = filteredExpenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-  const formatDate = (dateStr) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  const formatDate = (dateStr: string): string => {
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateStr).toLocaleDateString(undefined, options);
   };
 
-  const getCategoryColor = (category) => {
+  const getCategoryColor = (category: string): string => {
     const colors = {
       food: 'bg-green-100 text-green-800',
       transportation: 'bg-blue-100 text-blue-800',
@@ -126,7 +126,7 @@ function ExpenseList(): JSX.Element {
     return colors[category] || colors.other;
   };
 
-  const getCategoryLabel = (category) => {
+  const getCategoryLabel = (category: string): string => {
     const labels = {
       food: 'Food & Dining',
       transportation: 'Transportation',
@@ -221,7 +221,7 @@ function ExpenseList(): JSX.Element {
                   id="category-filter"
                   className="block w-full p-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-primary-500"
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
+                  onChange={(e) => setFilter(e.target.value as CategoryFilter)}
                 >
                   <option value="all">All Categories</option>
                   <option value="food">Food & Dining</option>
