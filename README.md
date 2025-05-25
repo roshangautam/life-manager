@@ -6,7 +6,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 
-A comprehensive household and personal finance management system built with FastAPI and React. Life Manager helps you manage your household, track expenses, plan budgets, and organize events in one place.
+A comprehensive household and personal finance management system built with FastAPI and React with Tailwind CSS. Life Manager helps you manage your household, track expenses, plan budgets, and organize events in one place with a modern, minimal UI.
 
 ## ✨ Features
 
@@ -32,8 +32,11 @@ A comprehensive household and personal finance management system built with Fast
   - Event reminders
   - Recurring events
 
-- 📱 **Responsive Design**
-  - Works on desktop and mobile
+- 📱 **Modern UI & Responsive Design**
+  - Clean, minimal interface with Tailwind CSS v3.3.5
+  - Works on desktop and mobile devices
+  - Admin portal layout with sidebar navigation
+  - Custom-themed components and consistent styling
   - Progressive Web App (PWA) support
 
 ## 🚀 Getting Started
@@ -179,7 +182,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [FastAPI](https://fastapi.tiangolo.com/) - The web framework used
 - [SQLAlchemy](https://www.sqlalchemy.org/) - The ORM used
 - [React](https://reactjs.org/) - Frontend library
-- [MUI](https://mui.com/) - React component library
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [Heroicons](https://heroicons.com/) - SVG icon library
 
 ---
 
