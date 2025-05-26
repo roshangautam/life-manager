@@ -64,6 +64,7 @@ jobs:
         
         # Test Make docker commands
         echo "\nTesting Make docker commands..."
+        cp .env.example .env
         make docker-up
         echo "\nChecking containers..."
         docker ps -a
