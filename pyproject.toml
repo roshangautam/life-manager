@@ -1,12 +1,9 @@
-[project]
-name = "life-manager"
-dynamic = [ "version" ]
-
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
+name = "life-manager"
 version = "0.1.0"
 description = "A comprehensive household and personal finance management system"
 readme = "README.md"
@@ -75,7 +72,6 @@ Source = "https://github.com/yourusername/life-manager"
 # Main application
 lifemanager = "api.__main__:run"
 
-[project.scripts]
 # Development Commands
 format = "poetry.format:main"
 lint = "poetry.lint:main"
