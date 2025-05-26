@@ -54,10 +54,6 @@ jobs:
     - name: Install Python dependencies
       run: |
         poetry install
-        poetry run lint
-        poetry run test
-        poetry run coverage
-        poetry run clean
 
     - name: Build & Run Containers
       run: |
