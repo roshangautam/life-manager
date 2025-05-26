@@ -6,8 +6,16 @@ on:
     types: [completed]
     branches: [main]
 
+# This workflow requires the following permissions to trigger
+permissions:
+  contents: read
+  packages: read
+  id-token: write  # Needed for Azure authentication
+
 env:
-  DOCKER_HUB_REPOSITORY: "roshangautam/life-manager"
+  # Use GitHub Container Registry (GHCR)
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
   RESOURCE_GROUP: "life-manager-rg"
   CONTAINER_APP_NAME: "life-manager"
   CONTAINER_APP_ENVIRONMENT: "life-manager-env"
@@ -26,25 +34,36 @@ jobs:
             echo "::error::CI workflow did not succeed"
             exit 1
           fi
+  manual-approval:
+    needs: [check-ci]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for manual approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: "roshangautam"
+          instructions: "Please approve this deployment"
 
   deploy:
-    needs: check-ci
+    needs: manual-approval
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'success'
+    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Login to Docker Hub
-      uses: docker/login-action@v2
+    - name: Get the workflow run info
+      uses: octokit/request-action@v2.x
+      id: get_workflow_run
       with:
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+        route: GET /repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v4
-      with:
-        push: true
-        tags: ${{ env.DOCKER_HUB_REPOSITORY }}:latest
+    - name: Extract commit SHA
+      id: extract_sha
+      run: |
+        SHA=$(echo '${{ steps.get_workflow_run.outputs.data }}' | jq -r '.head_sha')
+        echo "sha=$SHA" >> $GITHUB_OUTPUT
     
     - name: Login to Azure
       uses: azure/login@v1
@@ -56,19 +75,16 @@ jobs:
       with:
         azcliversion: 2.40.0
         inlineScript: |
+          # Install containerapp extension if not already installed
           az extension add --name containerapp --upgrade
+          
+          # Get the image reference with the specific SHA
+          IMAGE_REF="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@sha256:${{ steps.extract_sha.outputs.sha }}"
+          
+          echo "Deploying image: $IMAGE_REF"
+          
+          # Update the container app with the new image
           az containerapp update \
             --name ${{ env.CONTAINER_APP_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
-            --image ${{ env.DOCKER_HUB_REPOSITORY }}:latest
-
-  manual-approval:
-    needs: [check-ci]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Wait for manual approval
-        uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: "roshangautam"
-          instructions: "Please approve this deployment"
+            --image "$IMAGE_REF"

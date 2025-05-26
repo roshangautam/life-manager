@@ -7,11 +7,17 @@ on:
     branches: ["main"]
 
 env:
+  # Docker image settings
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  # Database settings
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: postgres
   POSTGRES_DB: lifemanager
   DATABASE_URL: postgresql://postgres:postgres@postgres:5432/lifemanager
   PYTHONPATH: ${{ github.workspace }}
+  # Use the GitHub token for authentication
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   test:
@@ -41,6 +47,19 @@ jobs:
       run: |
         make install
     
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+      with:
+        driver: docker-container
+        driver-opts: image=moby/buildkit:latest
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ env.GITHUB_TOKEN }}
+
     - name: Test Docker commands
       run: |
         # Test basic Docker commands
@@ -61,3 +80,21 @@ jobs:
         # Clean up
         echo "\nCleaning up..."
         make docker-down
+    
+    - name: Build and push Docker image
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        labels: |
+          org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          org.opencontainers.image.revision=${{ github.sha }}
+          org.opencontainers.image.created=${{ github.event.repository.created_at }}
+          org.opencontainers.image.title=Life Manager
+          org.opencontainers.image.description="Life Manager Application"
