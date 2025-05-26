@@ -23,7 +23,7 @@ from ..schemas_main import (
     UserUpdate,
 )
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/token")
 

@@ -7,8 +7,6 @@ from ..models.database import get_db
 from ..schemas_main import HouseholdCreate, HouseholdResponse
 
 router = APIRouter(
-    prefix="/households",
-    tags=["Households"],
     dependencies=[Depends(get_current_user)],  # Protect all routes in this router
 )
 

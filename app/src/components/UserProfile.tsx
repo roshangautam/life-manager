@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, JSX } from 'react';
 import { UserCircleIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface Profile {
@@ -80,8 +80,8 @@ function UserProfile(): JSX.Element {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="card">
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="card p-6">
         {/* Profile Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">

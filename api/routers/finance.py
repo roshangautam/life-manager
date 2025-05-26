@@ -17,8 +17,6 @@ from ..schemas_main import (
 )
 
 router = APIRouter(
-    prefix="/finance",
-    tags=["Finance"],
     dependencies=[Depends(get_current_user)],  # Protect all finance routes
 )
 

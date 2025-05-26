@@ -17,9 +17,9 @@ env:
   # Use GitHub Container Registry (GHCR)
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  RESOURCE_GROUP: "life-manager-rg"
-  CONTAINER_APP_NAME: "life-manager"
-  CONTAINER_APP_ENVIRONMENT: "life-manager-env"
+  RESOURCE_GROUP: "wus3-domusai"
+  CONTAINER_APP_NAME: "domusai"
+  CONTAINER_APP_ENVIRONMENT: "wus3-domusai-container-environment"
 
 jobs:
   check-ci:
