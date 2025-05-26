@@ -85,68 +85,43 @@ jobs:
           # Install containerapp extension if not already installed
           az extension add --name containerapp --upgrade
 
-          # Create storage for PostgreSQL (volume mount)
-          STORAGE_NAME="lifemanagerdb"
-          if ! az storage account show --name $STORAGE_NAME --resource-group ${{ env.RESOURCE_GROUP }} > /dev/null 2>&1; then
-            echo "Creating storage account for PostgreSQL data..."
-            az storage account create \
-              --name $STORAGE_NAME \
+          # Note: For production, it's better to use Azure Database for PostgreSQL
+          # We'll deploy a PostgreSQL container without persistent storage since
+          # Azure Container Apps doesn't fully support stateful workloads well
+
+          echo "Setting up PostgreSQL as a managed resource..."
+
+          # Check if we have a pre-existing managed PostgreSQL server
+          if ! az postgres flexible-server show --name life-manager-db-server --resource-group ${{ env.RESOURCE_GROUP }} > /dev/null 2>&1; then
+            echo "Creating PostgreSQL server..."
+            # Create a managed PostgreSQL instance
+            az postgres flexible-server create \
+              --name life-manager-db-server \
               --resource-group ${{ env.RESOURCE_GROUP }} \
-              --sku Standard_LRS \
-              --kind StorageV2
+              --location westus3 \
+              --admin-user ${{ env.POSTGRES_USER }} \
+              --admin-password "${{ env.POSTGRES_PASSWORD }}" \
+              --database-name ${{ env.POSTGRES_DB }} \
+              --sku-name Standard_B1ms \
+              --tier Burstable \
+              --version 15 \
+              --yes
 
-            # Create file share
-            az storage share create \
-              --name postgres-data \
-              --account-name $STORAGE_NAME
-          fi
-
-          # Get storage key
-          STORAGE_KEY=$(az storage account keys list \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --account-name $STORAGE_NAME \
-            --query "[0].value" -o tsv)
-
-          echo "Deploying PostgreSQL database..."
-          # Deploy PostgreSQL container
-          if az containerapp show --name ${{ env.CONTAINER_APP_DB_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} > /dev/null 2>&1; then
-            echo "PostgreSQL Container app exists, updating..."
-            az containerapp update \
-              --name ${{ env.CONTAINER_APP_DB_NAME }} \
+            # Configure server to allow connections from Azure services
+            az postgres flexible-server firewall-rule create \
+              --name AllowAllAzureServices \
               --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image "postgres:15-alpine"
+              --server-name life-manager-db-server \
+              --start-ip-address 0.0.0.0 \
+              --end-ip-address 0.0.0.0
           else
-            echo "PostgreSQL Container app does not exist, creating..."
-            az containerapp create \
-              --name ${{ env.CONTAINER_APP_DB_NAME }} \
-              --resource-group ${{ env.RESOURCE_GROUP }} \
-              --environment ${{ env.CONTAINER_APP_ENVIRONMENT }} \
-              --image "postgres:15-alpine" \
-              --target-port 5432 \
-              --ingress internal \
-              --cpu 1.0 \
-              --memory 2Gi \
-              --min-replicas 1 \
-              --max-replicas 1 \
-              --env-vars \
-                "POSTGRES_USER=${{ env.POSTGRES_USER }}" \
-                "POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }}" \
-                "POSTGRES_DB=${{ env.POSTGRES_DB }}" \
-                "PGDATA=/var/lib/postgresql/data/pgdata" \
-              --scale-rule-name "always-on" \
-              --scale-rule-type "http" \
-              --scale-rule-http-concurrency 100 \
-              --volumes "postgres-vol=${STORAGE_NAME}:/postgres-data:postgres-data:rw" \
-              --volume-mounts "postgres-vol=/var/lib/postgresql/data"
+            echo "PostgreSQL server already exists."
           fi
 
-          # Get the database FQDN
-          DB_FQDN=$(az containerapp show \
-            --name ${{ env.CONTAINER_APP_DB_NAME }} \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --query properties.configuration.ingress.fqdn \
-            --output tsv)
+          # Get the PostgreSQL connection info
+          DB_FQDN="life-manager-db-server.postgres.database.azure.com"
 
+          echo "Using managed PostgreSQL server for database..."
           echo "Database FQDN: $DB_FQDN"
 
           # Get the image reference with the latest tag for API
