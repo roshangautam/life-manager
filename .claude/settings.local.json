@@ -8,7 +8,9 @@
       "Bash(gtimeout:*)",
       "Bash(yarn build)",
       "Bash(poetry run:*)",
-      "Bash(poetry show:*)"
+      "Bash(poetry show:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)"
     ],
     "deny": []
   }

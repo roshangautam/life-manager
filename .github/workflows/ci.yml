@@ -54,23 +54,22 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install poetry
         poetry install --no-interaction --no-ansi
-        poetry show
 
     - name: Build & Run Containers
       run: |
         echo "\nTesting Build & Run docker commands..."
         cp .env.example .env
-        poetry run docker-up
+        make docker-up
         echo "\nChecking containers..."
         docker ps -a
 
         # Test database migration
         echo "\nTesting database migration..."
-        poetry run db-show
+        make db-show
 
         # Clean up
         echo "\nCleaning up..."
-        poetry run docker-down
+        make docker-down
 
     - name: Build and push API Docker image
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
