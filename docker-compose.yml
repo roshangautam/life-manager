@@ -88,8 +88,8 @@ services:
   # App Service
   app:
     build:
-      context: ./
-      dockerfile: ./app/Dockerfile
+      context: ./app
+      dockerfile: Dockerfile
     container_name: life-manager-app
     ports:
       - "${APP_PORT:-3000}:80"

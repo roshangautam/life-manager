@@ -1,15 +1,12 @@
 FROM node:23-alpine
 
-WORKDIR /app
+WORKDIR /webapp
 
 # Copy application
-COPY app/ .
+COPY . .
 
 # Set environment variables
 # ENV NODE_ENV=production
-
-RUN node --version
-RUN npm --version
 
 # Install dependencies
 RUN yarn install
@@ -21,7 +18,7 @@ RUN yarn build
 FROM nginx:alpine
 
 # Copy the built app to nginx server
-COPY --from=0 /app/dist /usr/share/nginx/html
+COPY --from=0 /webapp/dist /usr/share/nginx/html
 
 # Copy custom nginx config if needed
 # COPY nginx.conf /etc/nginx/conf.d/default.conf
