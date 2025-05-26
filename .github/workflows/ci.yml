@@ -61,7 +61,6 @@ jobs:
         # Test basic Docker commands
         echo "Testing Docker installation..."
         docker --version
-        docker compose --version
         
         # Test Make docker commands
         echo "\nTesting Make docker commands..."

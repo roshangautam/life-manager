@@ -24,7 +24,7 @@ export default function Header({ setSidebarOpen }: HeaderProps): JSX.Element {
   };
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 bg-white/80 backdrop-blur-md border-b border-slate-200/60 dark:bg-slate-800/80 dark:border-slate-700/60 shadow-sm">
+    <header className="sticky top-0 z-10 flex h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/60 dark:bg-slate-800/95 dark:border-slate-700/60 shadow-sm">
       <button
         type="button"
         className="px-4 text-slate-500 border-r border-slate-200/60 dark:border-slate-700/60 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden transition-all duration-200"
@@ -34,7 +34,7 @@ export default function Header({ setSidebarOpen }: HeaderProps): JSX.Element {
         <Bars3Icon className="w-6 h-6" aria-hidden="true" />
       </button>
       
-      <div className="flex justify-between flex-1 px-6">
+      <div className="flex justify-between flex-1 px-4 sm:px-6">
         <div className="flex items-center flex-1">
           <h1 className="text-xl font-bold bg-gradient-to-r from-slate-900 to-blue-600 dark:from-white dark:to-blue-200 bg-clip-text text-transparent lg:hidden">
             Life Manager

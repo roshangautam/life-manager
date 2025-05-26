@@ -31,7 +31,7 @@ export default function Layout({ children }: LayoutProps): JSX.Element {
   }, [location]);
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {/* Mobile sidebar backdrop */}
       <div 
         className={`fixed inset-0 z-20 bg-black/60 backdrop-blur-sm lg:hidden transition-all duration-300 ${
@@ -41,39 +41,43 @@ export default function Layout({ children }: LayoutProps): JSX.Element {
         aria-hidden="true"
       />
 
-      {/* Sidebar */}
-      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <Header setSidebarOpen={setSidebarOpen} />
+      <div className="flex flex-col lg:flex-row min-h-screen">
+        {/* Sidebar */}
+        <div className="lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
+          <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        </div>
         
-        {/* Main content area */}
-        <main className="flex-1 overflow-y-auto focus:outline-none scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 p-4 md:p-6">
-          <div className="max-w-7xl mx-auto">
-            {/* Page title with modern styling */}
-            <div className="mb-6">
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 dark:from-white dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent">
-                {location.pathname === '/dashboard' ? 'Dashboard' : 
-                 location.pathname.startsWith('/finance') ? 'Finance Manager' : 
-                 location.pathname.startsWith('/household') ? 'Household Management' :
-                 location.pathname.startsWith('/profile') ? 'Profile Settings' : 'Life Manager'}
-              </h1>
-              <p className="mt-1 text-sm md:text-base text-slate-600 dark:text-slate-400">
-                {location.pathname === '/dashboard' ? 'Welcome back! Here\'s your overview' : 
-                 location.pathname.startsWith('/finance') ? 'Manage your finances and budgets' : 
-                 location.pathname.startsWith('/household') ? 'Organize your household activities' :
-                 location.pathname.startsWith('/profile') ? 'Update your personal information' : 'Manage your life efficiently'}
-              </p>
+        {/* Main content */}
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Header */}
+          <Header setSidebarOpen={setSidebarOpen} />
+          
+          {/* Page content */}
+          <main className="flex-1 overflow-y-auto p-4 md:p-6 w-full max-w-7xl mx-auto">
+            <div className="max-w-7xl mx-auto">
+              {/* Page title with modern styling */}
+              <div className="mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 dark:from-white dark:via-blue-100 dark:to-indigo-100 bg-clip-text text-transparent">
+                  {location.pathname === '/dashboard' ? 'Dashboard' : 
+                   location.pathname.startsWith('/finance') ? 'Finance Manager' : 
+                   location.pathname.startsWith('/household') ? 'Household Management' :
+                   location.pathname.startsWith('/profile') ? 'Profile Settings' : 'Life Manager'}
+                </h1>
+                <p className="mt-1 text-sm md:text-base text-slate-600 dark:text-slate-400">
+                  {location.pathname === '/dashboard' ? 'Welcome back! Here\'s your overview' : 
+                   location.pathname.startsWith('/finance') ? 'Manage your finances and budgets' : 
+                   location.pathname.startsWith('/household') ? 'Organize your household activities' :
+                   location.pathname.startsWith('/profile') ? 'Update your personal information' : 'Manage your life efficiently'}
+                </p>
+              </div>
+              
+              {/* Page content with modern container */}
+              <div className="space-y-6">
+                {children}
+              </div>
             </div>
-            
-            {/* Page content with modern container */}
-            <div className="space-y-4">
-              {children}
-            </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );
