@@ -1,19 +1,36 @@
 name: Deploy to Azure
 
 on:
-  push:
-    branches: ["main"]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
 
 env:
-  DOCKER_HUB_REPOSITORY: "your-dockerhub-username/life-manager"
-  RESOURCE_GROUP: "your_resource_group"
+  DOCKER_HUB_REPOSITORY: "roshangautam/life-manager"
+  RESOURCE_GROUP: "life-manager-rg"
   CONTAINER_APP_NAME: "life-manager"
   CONTAINER_APP_ENVIRONMENT: "life-manager-env"
 
 jobs:
-  deploy:
+  check-ci:
     runs-on: ubuntu-latest
-    
+    outputs:
+      ci-success: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Check CI status
+        id: check-ci
+        run: |
+          echo "CI workflow result: ${{ github.event.workflow_run.conclusion }}"
+          if [[ "${{ github.event.workflow_run.conclusion }}" != "success" ]]; then
+            echo "::error::CI workflow did not succeed"
+            exit 1
+          fi
+
+  deploy:
+    needs: check-ci
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
     steps:
     - uses: actions/checkout@v4
     
@@ -44,3 +61,14 @@ jobs:
             --name ${{ env.CONTAINER_APP_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
             --image ${{ env.DOCKER_HUB_REPOSITORY }}:latest
+
+  manual-approval:
+    needs: [check-ci]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for manual approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: "roshangautam"
+          instructions: "Please approve this deployment"

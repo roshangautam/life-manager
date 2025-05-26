@@ -127,93 +127,6 @@ A comprehensive household and personal finance management system built with Fast
    npm start
    ```
 
-## 📚 Documentation
-
-- [API Documentation](http://localhost:8000/docs) (available after starting the backend)
-- [App Documentation](./app/README.md)
-- [Architecture Decision Records](./docs/adr/)
-- [API Reference](./docs/API_REFERENCE.md)
-
-## 🛠 Development
-
-### Code Style
-
-We use:
-- [Black](https://github.com/psf/black) for code formatting
-- [isort](https://pycqa.github.io/isort/) for import sorting
-- [mypy](http://mypy-lang.org/) for static type checking
-
-Before committing, run:
-```bash
-make format  # Runs black and isort
-make lint    # Runs flake8 and mypy
-```
-
-### Testing
-
-Run tests with:
-```bash
-make test
-```
-
-### Git Hooks
-
-Pre-commit hooks are set up to ensure code quality. Install them with:
-```bash
-pre-commit install
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) to get started.
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [FastAPI](https://fastapi.tiangolo.com/) - The web framework used
-- [SQLAlchemy](https://www.sqlalchemy.org/) - The ORM used
-- [React](https://reactjs.org/) - Frontend library
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
-- [Heroicons](https://heroicons.com/) - SVG icon library
-
----
-
-<div align="center">
-  Made with ❤️ by Your Name
-</div>
-   ```
-
-5. Start the backend server:
-   ```bash
-   uvicorn api.main:app --reload
-   ```
-
-### 3. Set up the app
-
-1. Navigate to the app directory:
-   ```bash
-   cd app
-   ```
-
-2. Install Node.js dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Start the development server:
-   ```bash
-   npm start
-   ```
-
 ### 4. Access the application
 
 - Frontend: http://localhost:3000
@@ -414,6 +327,65 @@ npm test
 
 3. Access the application at http://localhost:8000
 
-## License
+## 📚 Documentation
+
+- [API Documentation](http://localhost:8000/docs) (available after starting the backend)
+- [App Documentation](./app/README.md)
+- [Architecture Decision Records](./docs/adr/)
+- [API Reference](./docs/API_REFERENCE.md)
+
+## 🛠 Development
+
+### Code Style
+
+We use:
+- [Black](https://github.com/psf/black) for code formatting
+- [isort](https://pycqa.github.io/isort/) for import sorting
+- [mypy](http://mypy-lang.org/) for static type checking
+
+Before committing, run:
+```bash
+make format  # Runs black and isort
+make lint    # Runs flake8 and mypy
+```
+
+### Testing
+
+Run tests with:
+```bash
+make test
+```
+
+### Git Hooks
+
+Pre-commit hooks are set up to ensure code quality. Install them with:
+```bash
+pre-commit install
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read our [Contributing Guidelines](CONTRIBUTING.md) to get started.
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [FastAPI](https://fastapi.tiangolo.com/) - The web framework used
+- [SQLAlchemy](https://www.sqlalchemy.org/) - The ORM used
+- [React](https://reactjs.org/) - Frontend library
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [Heroicons](https://heroicons.com/) - SVG icon library
+
+---
+<div align="center">
+Made with ❤️ by [Roshan Gautam](https://roshangautam.com/)
+</div>
