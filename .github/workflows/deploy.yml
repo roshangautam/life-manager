@@ -141,7 +141,11 @@ jobs:
               --name ${{ env.CONTAINER_APP_API_NAME }} \
               --resource-group ${{ env.RESOURCE_GROUP }} \
               --image "$API_IMAGE_REF" \
-              --set-env-vars "DATABASE_URL=${DB_CONNECTION}"
+              --set-env-vars "DATABASE_URL=${DB_CONNECTION}" \
+              --liveness-probe "/healthz" \
+              --readiness-probe "/readyz" \
+              --cpu 1.0 \
+              --memory 2Gi
           else
             echo "API Container app does not exist, creating..."
             az containerapp create \
@@ -151,13 +155,15 @@ jobs:
               --image "$API_IMAGE_REF" \
               --target-port 8000 \
               --ingress external \
-              --cpu 0.5 \
-              --memory 1Gi \
+              --cpu 1.0 \
+              --memory 2Gi \
               --min-replicas 1 \
               --max-replicas 3 \
               --env-vars \
                 "DATABASE_URL=${DB_CONNECTION}" \
-                "ENV=production"
+                "ENV=production" \
+              --liveness-probe "/healthz" \
+              --readiness-probe "/readyz"
           fi
 
           # Get the API FQDN to use in the frontend configuration
@@ -177,6 +183,11 @@ jobs:
             az containerapp update \
               --name ${{ env.CONTAINER_APP_NAME }} \
               --resource-group ${{ env.RESOURCE_GROUP }} \
+              --min-replicas 1 \
+              --max-replicas 5 \
+              --scale-rule-name "http-scale-rule" \
+              --scale-rule-type "http" \
+              --scale-rule-http-concurrency 100 \
               --image "$APP_IMAGE_REF" \
               --set-env-vars "VITE_API_URL=https://$API_FQDN"
           else
@@ -191,6 +202,9 @@ jobs:
               --cpu 0.5 \
               --memory 1Gi \
               --min-replicas 1 \
-              --max-replicas 3 \
+              --max-replicas 5 \
+              --scale-rule-name "http-scale-rule" \
+              --scale-rule-type "http" \
+              --scale-rule-http-concurrency 100 \
               --env-vars "VITE_API_URL=https://$API_FQDN"
           fi
