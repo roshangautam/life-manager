@@ -11,6 +11,7 @@ permissions:
   contents: read
   packages: read
   id-token: write  # Needed for Azure authentication
+  issues: write
 
 env:
   # Use GitHub Container Registry (GHCR)

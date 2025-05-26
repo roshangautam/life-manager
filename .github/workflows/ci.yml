@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: ["main"]
 
-# This workflow requires the following permissions to trigger
-permissions:
-  issues: write
-
 env:
   # Docker image settings
   REGISTRY: ghcr.io
