@@ -86,7 +86,7 @@ function ExpenseEntry(): JSX.Element {
       
       {/* Expense entry form */}
       <div className="card">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 p-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Amount */}
             <div>

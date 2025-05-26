@@ -4,6 +4,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.declarative import declarative_base
+
 # Base class for declarative models
 Base = declarative_base()
 

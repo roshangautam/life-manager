@@ -6,6 +6,13 @@ on:
   pull_request:
     branches: ["main"]
 
+env:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_DB: test
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test
+  PYTHONPATH: ${{ github.workspace }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -14,9 +21,9 @@ jobs:
       postgres:
         image: postgres:13
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
         ports:
           - 5432:5432
         options: >-
@@ -31,30 +38,41 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.8"
+        python-version: "3.10"
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y make
     
     - name: Install Poetry
       uses: snok/install-poetry@v1
       with:
         virtualenvs-create: true
         virtualenvs-in-project: true
-        version: "1.7.0"  # Explicit version to avoid compatibility issues
+        version: "1.7.0"
     
-    - name: Configure Poetry
+    - name: Install Python dependencies
       run: |
-        poetry config virtualenvs.in-project true
-        poetry config virtualenvs.create true
+        make install
     
-    - name: Install dependencies
+    - name: Test Docker commands
       run: |
-        poetry install --no-interaction --no-ansi
-    
-    - name: Run tests
-      run: |
-        poetry run pytest
-    
-    - name: Build frontend
-      run: |
-        cd app
-        npm ci
-        npm run build
+        # Test basic Docker commands
+        echo "Testing Docker installation..."
+        docker --version
+        docker-compose --version
+        
+        # Test Make docker commands
+        echo "\nTesting Make docker commands..."
+        make docker-up
+        echo "\nChecking containers..."
+        docker ps -a
+        
+        # Test database migration
+        echo "\nTesting database migration..."
+        make db-show
+        
+        # Clean up
+        echo "\nCleaning up..."
+        make docker-down

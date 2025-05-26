@@ -1,10 +1,12 @@
 from datetime import datetime
-from sqlalchemy.ext.declarative import declarative_base
+
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
 # Base class for declarative models
 Base = declarative_base()
+
 
 class Event(Base):
     __tablename__ = "events"

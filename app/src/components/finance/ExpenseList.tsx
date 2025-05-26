@@ -152,13 +152,12 @@ function ExpenseList(): JSX.Element {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Expense History</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            A detailed list of all your expenses and transactions
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Recent Transactions</h2>
+          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
+            Your recent expense history
           </p>
         </div>
         <div className="flex items-center space-x-3">
@@ -177,7 +176,7 @@ function ExpenseList(): JSX.Element {
       </div>
 
       {/* Search and filter */}
-      <div className="card space-y-4">
+      <div className="card space-y-4 p-6">
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           {/* Search */}
           <div className="relative flex-1">
@@ -277,64 +276,64 @@ function ExpenseList(): JSX.Element {
       </div>
 
       {/* Expenses table */}
-      <div className="card overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 shadow-sm rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden p-6">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+            <thead className="bg-slate-50 dark:bg-slate-700/50">
               <tr>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  className="px-4 py-2.5 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/70"
                   onClick={() => handleSort('date')}
                 >
                   <div className="flex items-center">
                     <span>Date</span>
                     {sortField === 'date' && (
                       sortDirection === 'asc' ? 
-                        <ChevronUpIcon className="w-4 h-4 ml-1" /> : 
-                        <ChevronDownIcon className="w-4 h-4 ml-1" />
+                        <ChevronUpIcon className="w-3.5 h-3.5 ml-1" /> : 
+                        <ChevronDownIcon className="w-3.5 h-3.5 ml-1" />
                     )}
                   </div>
                 </th>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  className="px-4 py-2.5 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/70"
                   onClick={() => handleSort('description')}
                 >
                   <div className="flex items-center">
                     <span>Description</span>
                     {sortField === 'description' && (
                       sortDirection === 'asc' ? 
-                        <ChevronUpIcon className="w-4 h-4 ml-1" /> : 
-                        <ChevronDownIcon className="w-4 h-4 ml-1" />
+                        <ChevronUpIcon className="w-3.5 h-3.5 ml-1" /> : 
+                        <ChevronDownIcon className="w-3.5 h-3.5 ml-1" />
                     )}
                   </div>
                 </th>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  className="px-4 py-2.5 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/70"
                   onClick={() => handleSort('category')}
                 >
                   <div className="flex items-center">
                     <span>Category</span>
                     {sortField === 'category' && (
                       sortDirection === 'asc' ? 
-                        <ChevronUpIcon className="w-4 h-4 ml-1" /> : 
-                        <ChevronDownIcon className="w-4 h-4 ml-1" />
+                        <ChevronUpIcon className="w-3.5 h-3.5 ml-1" /> : 
+                        <ChevronDownIcon className="w-3.5 h-3.5 ml-1" />
                     )}
                   </div>
                 </th>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  className="px-4 py-2.5 text-right text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/70"
                   onClick={() => handleSort('amount')}
                 >
                   <div className="flex items-center justify-end">
                     <span>Amount</span>
                     {sortField === 'amount' && (
                       sortDirection === 'asc' ? 
-                        <ChevronUpIcon className="w-4 h-4 ml-1" /> : 
-                        <ChevronDownIcon className="w-4 h-4 ml-1" />
+                        <ChevronUpIcon className="w-3.5 h-3.5 ml-1" /> : 
+                        <ChevronDownIcon className="w-3.5 h-3.5 ml-1" />
                     )}
                   </div>
                 </th>
@@ -344,18 +343,18 @@ function ExpenseList(): JSX.Element {
               {sortedExpenses.length > 0 ? (
                 sortedExpenses.map(expense => (
                   <tr key={expense.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-2.5 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(expense.date)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-4 py-2.5 whitespace-nowrap text-sm font-medium text-gray-900">
                       {expense.description}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-4 py-2.5 whitespace-nowrap text-sm text-gray-500">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(expense.category)}`}>
                         {getCategoryLabel(expense.category)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">
+                    <td className="px-4 py-2.5 whitespace-nowrap text-sm text-right font-medium text-gray-900">
                       ${expense.amount.toFixed(2)}
                     </td>
                   </tr>

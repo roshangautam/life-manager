@@ -71,12 +71,12 @@ function BudgetOverview(): JSX.Element {
   const totalOverspent = budgets.reduce((sum, budget) => sum + Math.max(0, budget.spent - budget.limit), 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Budget Overview</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white">Budget Overview</h1>
+          <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
             Track your spending across different categories
           </p>
         </div>
@@ -105,58 +105,62 @@ function BudgetOverview(): JSX.Element {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="card bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Budget Card */}
+        <div className="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Total Budget</p>
-              <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">
-                ${totalLimit.toLocaleString()}
-              </p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Budget</p>
+              <p className="text-lg font-bold text-slate-900 dark:text-white">${totalLimit.toFixed(2)}</p>
             </div>
-            <CurrencyDollarIcon className="w-8 h-8 text-blue-500" />
+            <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+              <CurrencyDollarIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
           </div>
         </div>
 
-        <div className="card bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800">
+        {/* Total Spent Card */}
+        <div className="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-green-600 dark:text-green-400">Total Spent</p>
-              <p className="text-2xl font-bold text-green-900 dark:text-green-100">
-                ${totalSpent.toLocaleString()}
-              </p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Total Spent</p>
+              <p className="text-lg font-bold text-slate-900 dark:text-white">${totalSpent.toFixed(2)}</p>
             </div>
-            <CheckCircleIcon className="w-8 h-8 text-green-500" />
+            <div className="p-1.5 rounded-lg bg-green-100 dark:bg-green-900/30">
+              <ClockIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
+            </div>
           </div>
         </div>
 
-        <div className="card bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border-amber-200 dark:border-amber-800">
+        {/* Remaining Budget Card */}
+        <div className="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-amber-600 dark:text-amber-400">Remaining</p>
-              <p className="text-2xl font-bold text-amber-900 dark:text-amber-100">
-                ${totalRemaining.toLocaleString()}
-              </p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Remaining</p>
+              <p className="text-lg font-bold text-amber-600 dark:text-amber-400">${totalRemaining.toFixed(2)}</p>
             </div>
-            <ClockIcon className="w-8 h-8 text-amber-500" />
+            <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+              <CheckCircleIcon className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            </div>
           </div>
         </div>
 
-        <div className="card bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-red-200 dark:border-red-800">
+        {/* Overspent Card */}
+        <div className="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm border border-slate-100 dark:border-slate-700">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-red-600 dark:text-red-400">Overspent</p>
-              <p className="text-2xl font-bold text-red-900 dark:text-red-100">
-                ${totalOverspent.toLocaleString()}
-              </p>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Overspent</p>
+              <p className="text-lg font-bold text-rose-600 dark:text-rose-400">${totalOverspent.toFixed(2)}</p>
             </div>
-            <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
+            <div className="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-900/30">
+              <ExclamationTriangleIcon className="w-5 h-5 text-rose-600 dark:text-rose-400" />
+            </div>
           </div>
         </div>
       </div>
 
       {/* Budget Categories */}
-      <div className="card">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-6">Category Breakdown</h3>
         <div className="space-y-6">
           {budgets.map((budget) => {
