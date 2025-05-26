@@ -70,8 +70,10 @@ ENV PYTHONPATH=/app \
     PATH="/home/appuser/.local/bin:$PATH"
 
 # Expose the ports the app runs on
-EXPOSE 8000  # FastAPI
-EXPOSE 50051  # gRPC
+#FastAPI
+EXPOSE 8000
+#gRPC
+EXPOSE 50051
 # Expose the port the app runs on
 EXPOSE 8000
 

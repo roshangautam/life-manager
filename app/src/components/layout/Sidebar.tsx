@@ -194,7 +194,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): 
 
       {/* Sidebar */}
       <div 
-        className={`fixed lg:sticky inset-y-0 left-0 z-30 flex flex-col w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed lg:sticky inset-y-0 left-0 z-30 flex flex-col w-72 h-screen bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0 lg:inset-0`}
       >
@@ -221,7 +221,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): 
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 overflow-y-auto h-[calc(100vh-8rem)]">
+        <nav className="flex-1 px-3 py-4 overflow-y-auto">
           <div className="space-y-1">
             {navigation.map((item) => {
               return (

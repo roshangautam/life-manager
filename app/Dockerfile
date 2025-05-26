@@ -2,20 +2,17 @@ FROM node:21-alpine
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json first for better caching
-COPY package*.json ./
-
-# Install dependencies
-RUN npm ci
-
-# Copy the rest of the application
+# Copy the application
 COPY . .
 
 # Set environment variables
 ENV NODE_ENV=production
 
+# Install dependencies
+RUN yarn install
+
 # Build the application
-RUN npm run build
+RUN yarn build
 
 # Use a lightweight server to serve the static files
 FROM nginx:alpine
