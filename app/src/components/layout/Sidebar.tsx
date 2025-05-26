@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, JSX } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   HomeIcon,
@@ -6,7 +6,6 @@ import {
   UsersIcon,
   CalendarIcon,
   ChartBarIcon,
-  Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
   ChevronDownIcon,
   ChevronRightIcon,
@@ -126,7 +125,7 @@ const navigation: NavItem[] = [
 export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): JSX.Element {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { currentUser, logout } = useAuth();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({});
   const [darkMode, setDarkMode] = useState(false);
 
@@ -224,97 +223,82 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 overflow-y-auto h-[calc(100vh-8rem)]">
           <div className="space-y-1">
-            {navigation.map((item) => (
-              <div key={item.name} className="space-y-1">
-                {item.href ? (
-                  <Link
-                    to={item.href}
-                    className={`flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-                      isActive(item.href)
-                        ? 'bg-primary-50 text-primary-700 dark:bg-gray-700 dark:text-white'
-                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50'
-                    }`}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <div className="flex items-center">
-                      <item.icon 
-                        className={`w-5 h-5 mr-3 ${
-                          isActive(item.href) 
-                            ? 'text-primary-600 dark:text-primary-400' 
-                            : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400'
-                        }`} 
-                        aria-hidden="true" 
-                      />
-                      {item.name}
-                    </div>
-                    {item.badge && (
-                      <span className="inline-flex items-center justify-center px-2 py-0.5 ml-3 text-xs font-medium rounded-full bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300">
-                        {item.badge}
-                      </span>
-                    )}
-                  </Link>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => toggleMenu(item.name)}
-                      className={`group flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
-                        hasActiveChild(item.children)
-                          ? 'text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white'
-                          : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50'
-                      }`}
+            {navigation.map((item) => {
+              return (
+                <div key={item.name} className="space-y-1">
+                  {item.href ? (
+                    <Link
+                      to={item.href}
+                      className={`flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${isActive(item.href)
+                          ? 'bg-primary-50 text-primary-700 dark:bg-gray-700 dark:text-white'
+                          : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50'}`}
+                      onClick={() => setSidebarOpen(false)}
                     >
                       <div className="flex items-center">
-                        <item.icon 
-                          className={`w-5 h-5 mr-3 ${
-                            hasActiveChild(item.children)
+                        <item.icon
+                          className={`w-5 h-5 mr-3 ${isActive(item.href)
                               ? 'text-primary-600 dark:text-primary-400'
-                              : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400'
-                          }`} 
-                          aria-hidden="true" 
-                        />
+                              : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400'}`}
+                          aria-hidden="true" />
                         {item.name}
                       </div>
-                      {openMenus[item.name] ? (
-                        <ChevronDownIcon className="w-4 h-4 text-gray-400" />
-                      ) : (
-                        <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                      {item.badge && (
+                        <span className="inline-flex items-center justify-center px-2 py-0.5 ml-3 text-xs font-medium rounded-full bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300">
+                          {item.badge}
+                        </span>
                       )}
-                    </button>
-                    <div 
-                      className={`overflow-hidden transition-all duration-200 ${
-                        openMenus[item.name] ? 'max-h-96' : 'max-h-0'
-                      }`}
-                    >
-                      <div className="py-1 pl-11">
-                        {item.children.map((subItem) => (
-                          <Link
-                            key={subItem.name}
-                            to={subItem.href}
-                            className={`flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${
-                              isActive(subItem.href)
-                                ? 'text-primary-700 bg-primary-50 dark:bg-gray-700 dark:text-white'
-                                : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/50'
-                            }`}
-                            onClick={() => setSidebarOpen(false)}
-                          >
-                            <subItem.icon 
-                              className={`w-4 h-4 mr-2 ${
-                                isActive(subItem.href)
-                                  ? 'text-primary-600 dark:text-primary-400'
-                                  : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400'
-                              }`} 
-                              aria-hidden="true" 
-                            />
-                            {subItem.name}
-                          </Link>
-                        ))}
+                    </Link>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => toggleMenu(item.name)}
+                        className={`group flex items-center justify-between w-full px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${hasActiveChild(item.children || [])
+                            ? 'text-gray-900 bg-gray-100 dark:bg-gray-700 dark:text-white'
+                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700/50'}`}
+                      >
+                        <div className="flex items-center">
+                          <item.icon
+                            className={`w-5 h-5 mr-3 ${hasActiveChild(item.children || [])
+                                ? 'text-primary-600 dark:text-primary-400'
+                                : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400'}`}
+                            aria-hidden="true" />
+                          {item.name}
+                        </div>
+                        {openMenus[item.name] ? (
+                          <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+                        ) : (
+                          <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                        )}
+                      </button>
+                      <div
+                        className={`overflow-hidden transition-all duration-200 ${openMenus[item.name] ? 'max-h-96' : 'max-h-0'}`}
+                      >
+                        <div className="py-1 pl-11">
+                          {(item.children || []).map((subItem) => (
+                            <Link
+                              key={subItem.name}
+                              to={subItem.href}
+                              className={`flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${isActive(subItem.href)
+                                  ? 'text-primary-700 bg-primary-50 dark:bg-gray-700 dark:text-white'
+                                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/50'}`}
+                              onClick={() => setSidebarOpen(false)}
+                            >
+                              <subItem.icon
+                                className={`w-4 h-4 mr-2 ${isActive(subItem.href)
+                                    ? 'text-primary-600 dark:text-primary-400'
+                                    : 'text-gray-400 group-hover:text-gray-500 dark:text-gray-500 dark:group-hover:text-gray-400'}`}
+                                aria-hidden="true" />
+                              {subItem.name}
+                            </Link>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </nav>
 
@@ -322,11 +306,11 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): 
         <div className="p-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              {user?.photoURL ? (
+              {currentUser?.photoURL ? (
                 <img
                   className="w-10 h-10 rounded-full"
-                  src={user.photoURL}
-                  alt={user.displayName || 'User'}
+                  src={currentUser.photoURL}
+                  alt={currentUser.displayName || 'User'}
                 />
               ) : (
                 <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700">
@@ -336,10 +320,10 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps): 
             </div>
             <div className="ml-3 overflow-hidden">
               <p className="text-sm font-medium text-gray-900 truncate dark:text-white">
-                {user?.displayName || 'User'}
+                {currentUser?.displayName || 'User'}
               </p>
               <p className="text-xs text-gray-500 truncate dark:text-gray-400">
-                {user?.email || 'user@example.com'}
+                {currentUser?.email || 'user@example.com'}
               </p>
             </div>
             <div className="ml-auto">
