@@ -52,26 +52,37 @@ def reset(force: bool = False):
     if not force and not any(arg == "--force" for arg in sys.argv):
         try:
             confirm = input("Are you sure you want to continue? [y/N] ")
-            if confirm.lower() != 'y':
+            if confirm.lower() != "y":
                 print("Operation cancelled.")
                 return 0
         except EOFError:
-            print("Running in non-interactive mode. Use --force flag to skip confirmation.")
+            print(
+                "Running in non-interactive mode. Use --force flag to skip confirmation."
+            )
             return 1
-    
+
     print("Stopping and removing containers...")
     subprocess.run(["docker", "compose", "down", "-v"])
-    
+
     print("Starting PostgreSQL container...")
     subprocess.run(["docker", "compose", "up", "-d", "postgres"])
-    
+
     # Wait for database to be ready
     print("Waiting for database to be ready...")
     for _ in range(30):  # Try for 30 seconds
         result = subprocess.run(
-            ["docker", "compose", "exec", "-T", "postgres", "pg_isready", "-U", "postgres"],
+            [
+                "docker",
+                "compose",
+                "exec",
+                "-T",
+                "postgres",
+                "pg_isready",
+                "-U",
+                "postgres",
+            ],
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
         )
         if result.returncode == 0:
             break
@@ -79,7 +90,7 @@ def reset(force: bool = False):
     else:
         print("Error: Database is not ready after 30 seconds")
         return 1
-    
+
     print("Running database migrations...")
     return run_alembic_command("upgrade head")
 
@@ -89,10 +100,10 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: poetry run db-<command> [--force]")
         return 1
-    
+
     command = sys.argv[1]
     force = "--force" in sys.argv[2:]
-    
+
     commands = {
         "migrate": migrate,
         "upgrade": upgrade,
@@ -101,12 +112,12 @@ def main():
         "show": show,
         "reset": lambda: reset(force=force),
     }
-    
+
     if command not in commands:
         print(f"Unknown command: {command}")
         print(f"Available commands: {', '.join(commands.keys())}")
         return 1
-    
+
     return commands[command]() or 0
 
 

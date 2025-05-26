@@ -66,7 +66,7 @@ A comprehensive household and personal finance management system built with Fast
 
 3. Start the services:
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 4. Access the application:

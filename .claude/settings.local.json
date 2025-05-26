@@ -6,7 +6,9 @@
       "Bash(yarn dev)",
       "Bash(timeout:*)",
       "Bash(gtimeout:*)",
-      "Bash(yarn build)"
+      "Bash(yarn build)",
+      "Bash(poetry run:*)",
+      "Bash(poetry show:*)"
     ],
     "deny": []
   }

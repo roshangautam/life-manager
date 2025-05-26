@@ -13,11 +13,9 @@ class Household(Base):
 
     # Relationships
     members = relationship(
-        "HouseholdMember", 
-        back_populates="household",
-        cascade="all, delete-orphan"
+        "HouseholdMember", back_populates="household", cascade="all, delete-orphan"
     )
-    
+
     # Relationship to the creator user
     creator = relationship("User", foreign_keys=[created_by], viewonly=True)
 
@@ -31,14 +29,8 @@ class HouseholdMember(Base):
     role = Column(String, default="member")
 
     # Relationships
-    household = relationship(
-        "Household", 
-        back_populates="members"
-    )
-    user = relationship(
-        "User", 
-        back_populates="household_memberships"
-    )
+    household = relationship("Household", back_populates="members")
+    user = relationship("User", back_populates="household_memberships")
 
 
 class HouseholdInvitation(Base):

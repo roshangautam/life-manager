@@ -29,17 +29,11 @@ class User(Base):
 
     # Relationships
     # Using viewonly=True to avoid loading the actual relationship
-    household = relationship(
-        "Household", 
-        foreign_keys=[household_id],
-        viewonly=True
-    )
-    
+    household = relationship("Household", foreign_keys=[household_id], viewonly=True)
+
     # Relationship for household memberships
     household_memberships = relationship(
-        "HouseholdMember", 
-        back_populates="user",
-        cascade="all, delete-orphan"
+        "HouseholdMember", back_populates="user", cascade="all, delete-orphan"
     )
 
     def set_password(self, password: str):

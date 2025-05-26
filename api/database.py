@@ -12,7 +12,9 @@ from .models.base import Base
 load_dotenv()
 
 # Get database URL from environment variables
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db:5432/life_manager")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql://postgres:postgres@db:5432/life_manager"
+)
 
 # Create SQLAlchemy engine
 engine = create_engine(
@@ -26,6 +28,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # For SQLite, enable foreign key support
 if DATABASE_URL.startswith("sqlite"):
+
     @event.listens_for(Engine, "connect")
     def set_sqlite_pragma(dbapi_connection, connection_record):
         cursor = dbapi_connection.cursor()
@@ -44,20 +47,23 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
-def init_db(first_superuser_email: Optional[str] = None, first_superuser_password: Optional[str] = None) -> None:
+def init_db(
+    first_superuser_email: Optional[str] = None,
+    first_superuser_password: Optional[str] = None,
+) -> None:
     """
     Initialize the database by creating all tables and optionally creating a superuser.
-    
+
     Args:
         first_superuser_email: Email for the first superuser (optional)
         first_superuser_password: Password for the first superuser (optional)
     """
     # Import models here to avoid circular imports
     from .models.user import User, UserRole
-    
+
     # Create all tables
     Base.metadata.create_all(bind=engine)
-    
+
     # Create first superuser if credentials are provided
     if first_superuser_email and first_superuser_password:
         db = SessionLocal()
@@ -70,7 +76,7 @@ def init_db(first_superuser_email: Optional[str] = None, first_superuser_passwor
                     email=first_superuser_email,
                     full_name="Admin",
                     role=UserRole.ADMIN,
-                    is_active=True
+                    is_active=True,
                 )
                 new_user.set_password(first_superuser_password)
                 db.add(new_user)
