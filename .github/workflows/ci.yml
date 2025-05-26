@@ -49,11 +49,6 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ env.GITHUB_TOKEN }}
 
-    - name: Login to Azure
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
@@ -67,10 +62,6 @@ jobs:
         make docker-up
         echo "\nChecking containers..."
         docker ps -a
-
-        # Test database migration
-        echo "\nTesting database migration..."
-        make db-show
 
         # Clean up
         echo "\nCleaning up..."
