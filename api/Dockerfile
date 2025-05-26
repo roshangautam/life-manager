@@ -18,19 +18,15 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy requirements files first to leverage Docker cache
-COPY requirements.txt requirements-grpc.txt requirements-dev.txt ./
-
 # Install Python dependencies
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt -r requirements-grpc.txt && \
-    if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
+    pip install poetry
 
 # Copy the rest of the application
 COPY . .
 
 # Install the package in development mode
-RUN pip install -e .
+RUN poetry install --no-interaction --no-ansi
 
 # ==============================================
 # Runtime stage
