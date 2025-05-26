@@ -38,6 +38,12 @@ jobs:
       with:
         virtualenvs-create: true
         virtualenvs-in-project: true
+        version: "1.7.0"  # Explicit version to avoid compatibility issues
+    
+    - name: Configure Poetry
+      run: |
+        poetry config virtualenvs.in-project true
+        poetry config virtualenvs.create true
     
     - name: Install dependencies
       run: |
