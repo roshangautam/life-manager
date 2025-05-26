@@ -20,7 +20,12 @@ env:
   RESOURCE_GROUP: "wus3-domusai"
   CONTAINER_APP_NAME: "life-manager-app"
   CONTAINER_APP_API_NAME: "life-manager-api"
+  CONTAINER_APP_DB_NAME: "life-manager-db"
   CONTAINER_APP_ENVIRONMENT: "wus3-domusai-container-environment"
+  # Database settings
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  POSTGRES_DB: lifemanager
 
 jobs:
   check-ci:
@@ -51,7 +56,7 @@ jobs:
     needs: manual-approval
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'success'
-    
+
     steps:
     - name: Get the workflow run info
       uses: octokit/request-action@v2.x
@@ -60,18 +65,18 @@ jobs:
         route: GET /repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
+
     - name: Extract commit SHA
       id: extract_sha
       run: |
         SHA=$(echo '${{ steps.get_workflow_run.outputs.data }}' | jq -r '.head_sha')
         echo "sha=$SHA" >> $GITHUB_OUTPUT
-    
+
     - name: Login to Azure
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
+
     - name: Deploy to Azure Container Apps
       uses: azure/CLI@v1
       with:
@@ -79,21 +84,89 @@ jobs:
         inlineScript: |
           # Install containerapp extension if not already installed
           az extension add --name containerapp --upgrade
-            
+
+          # Create storage for PostgreSQL (volume mount)
+          STORAGE_NAME="lifemanagerdb"
+          if ! az storage account show --name $STORAGE_NAME --resource-group ${{ env.RESOURCE_GROUP }} > /dev/null 2>&1; then
+            echo "Creating storage account for PostgreSQL data..."
+            az storage account create \
+              --name $STORAGE_NAME \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --sku Standard_LRS \
+              --kind StorageV2
+
+            # Create file share
+            az storage share create \
+              --name postgres-data \
+              --account-name $STORAGE_NAME
+          fi
+
+          # Get storage key
+          STORAGE_KEY=$(az storage account keys list \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --account-name $STORAGE_NAME \
+            --query "[0].value" -o tsv)
+
+          echo "Deploying PostgreSQL database..."
+          # Deploy PostgreSQL container
+          if az containerapp show --name ${{ env.CONTAINER_APP_DB_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} > /dev/null 2>&1; then
+            echo "PostgreSQL Container app exists, updating..."
+            az containerapp update \
+              --name ${{ env.CONTAINER_APP_DB_NAME }} \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --image "postgres:15-alpine"
+          else
+            echo "PostgreSQL Container app does not exist, creating..."
+            az containerapp create \
+              --name ${{ env.CONTAINER_APP_DB_NAME }} \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --environment ${{ env.CONTAINER_APP_ENVIRONMENT }} \
+              --image "postgres:15-alpine" \
+              --target-port 5432 \
+              --ingress internal \
+              --cpu 1.0 \
+              --memory 2Gi \
+              --min-replicas 1 \
+              --max-replicas 1 \
+              --env-vars \
+                "POSTGRES_USER=${{ env.POSTGRES_USER }}" \
+                "POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }}" \
+                "POSTGRES_DB=${{ env.POSTGRES_DB }}" \
+                "PGDATA=/var/lib/postgresql/data/pgdata" \
+              --scale-rule-name "always-on" \
+              --scale-rule-type "http" \
+              --scale-rule-http-concurrency 100 \
+              --volumes "postgres-vol=${STORAGE_NAME}:/postgres-data:postgres-data:rw" \
+              --volume-mounts "postgres-vol=/var/lib/postgresql/data"
+          fi
+
+          # Get the database FQDN
+          DB_FQDN=$(az containerapp show \
+            --name ${{ env.CONTAINER_APP_DB_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --query properties.configuration.ingress.fqdn \
+            --output tsv)
+
+          echo "Database FQDN: $DB_FQDN"
+
           # Get the image reference with the latest tag for API
           API_IMAGE_REF="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-api:${{ steps.extract_sha.outputs.sha }}"
           # Get the image reference with the latest tag for APP
           APP_IMAGE_REF="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-app:${{ steps.extract_sha.outputs.sha }}"
-            
+
           echo "Deploying API image: $API_IMAGE_REF"
-            
+
+          # Create database connection string
+          DB_CONNECTION="postgresql+psycopg2://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@${DB_FQDN}:5432/${{ env.POSTGRES_DB }}"
+
           # Create or update the API container app
           if az containerapp show --name ${{ env.CONTAINER_APP_API_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} > /dev/null 2>&1; then
             echo "API Container app exists, updating..."
             az containerapp update \
               --name ${{ env.CONTAINER_APP_API_NAME }} \
               --resource-group ${{ env.RESOURCE_GROUP }} \
-              --image "$API_IMAGE_REF"
+              --image "$API_IMAGE_REF" \
+              --set-env-vars "DATABASE_URL=${DB_CONNECTION}"
           else
             echo "API Container app does not exist, creating..."
             az containerapp create \
@@ -106,20 +179,23 @@ jobs:
               --cpu 0.5 \
               --memory 1Gi \
               --min-replicas 1 \
-              --max-replicas 3
+              --max-replicas 3 \
+              --env-vars \
+                "DATABASE_URL=${DB_CONNECTION}" \
+                "ENV=production"
           fi
-            
+
           # Get the API FQDN to use in the frontend configuration
           API_FQDN=$(az containerapp show \
             --name ${{ env.CONTAINER_APP_API_NAME }} \
             --resource-group ${{ env.RESOURCE_GROUP }} \
             --query properties.configuration.ingress.fqdn \
             --output tsv)
-              
+
           echo "API FQDN: $API_FQDN"
-            
+
           echo "Deploying APP image: $APP_IMAGE_REF"
-            
+
           # Create or update the APP container app
           if az containerapp show --name ${{ env.CONTAINER_APP_NAME }} --resource-group ${{ env.RESOURCE_GROUP }} > /dev/null 2>&1; then
             echo "APP Container app exists, updating..."
