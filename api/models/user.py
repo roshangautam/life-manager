@@ -3,11 +3,9 @@ from typing import Optional
 
 from passlib.context import CryptContext
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-# Base class for declarative models
-Base = declarative_base()
+from .base import Base
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -30,8 +28,19 @@ class User(Base):
     household_id = Column(Integer, ForeignKey("households.id"), nullable=True)
 
     # Relationships
-    household = relationship("Household", foreign_keys=[household_id])
-    household_memberships = relationship("HouseholdMember", back_populates="user")
+    # Using viewonly=True to avoid loading the actual relationship
+    household = relationship(
+        "Household", 
+        foreign_keys=[household_id],
+        viewonly=True
+    )
+    
+    # Relationship for household memberships
+    household_memberships = relationship(
+        "HouseholdMember", 
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
     def set_password(self, password: str):
         """Hash and set the user's password"""

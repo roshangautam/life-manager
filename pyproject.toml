@@ -27,6 +27,22 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = ">=3.8.1"
+fastapi = "^0.104.1"
+uvicorn = {extras = ["standard"], version = "^0.22.0"}
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+bcrypt = "^4.0.1"
+python-multipart = "^0.0.6"
+pydantic = "^2.4.2"
+pydantic-settings = "^2.0.3"
+sqlalchemy = "^2.0.23"
+alembic = "^1.12.1"
+psycopg2-binary = "^2.9.9"
+python-dotenv = "^1.0.0"
+python-dateutil = "^2.8.2"
+email-validator = "^2.1.0"
+python-slugify = "^8.0.1"
+requests = "^2.31.0"
 
 [tool.poetry.group.dev.dependencies]
 black = ">=22.3.0"
@@ -38,6 +54,12 @@ pytest-asyncio = ">=0.18.3"
 httpx = ">=0.23.0"
 flake8 = "^6.0.0"
 pre-commit = "^3.0.0"
+uvicorn = {extras = ["standard"], version = "^0.22.0"}
+grpcio-tools = "^1.56.0"
+grpcio = "^1.56.0"
+grpcio-health-checking = "^1.56.0"
+grpcio-reflection = "^1.56.0"
+grpcio-testing = "^1.56.0"
 
 [tool.poetry.urls]
 Homepage = "https://github.com/yourusername/life-manager"
@@ -47,6 +69,36 @@ Source = "https://github.com/yourusername/life-manager"
 
 [tool.poetry.scripts]
 lifemanager = "api.__main__:run"
+
+# Development Commands
+format = "scripts.format:main"
+lint = "scripts.lint:main"
+test = "scripts.test:main"
+coverage = "scripts.coverage:main"
+clean = "scripts.clean:main"
+init-db = "scripts.init_db:main"
+
+# Database Commands
+db-migrate = "scripts.db:migrate"
+db-upgrade = "scripts.db:upgrade"
+db-downgrade = "scripts.db:downgrade"
+db-revision = "scripts.db:revision"
+db-show = "scripts.db:show"
+db-reset = "scripts.db:reset"
+
+# gRPC Commands
+grpc-generate = "scripts.grpc:generate"
+grpc-clean = "scripts.grpc:clean"
+
+# Server Management
+server-run = "scripts.server:run"
+server-dev = "scripts.server:dev"
+
+# Docker Compose
+docker-up = "scripts.docker:up"
+docker-down = "scripts.docker:down"
+docker-restart = "scripts.docker:restart"
+docker-logs = "scripts.docker:logs"
 
 [tool.black]
 line-length = 88

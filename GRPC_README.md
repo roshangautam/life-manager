@@ -21,10 +21,10 @@ This document provides information about the gRPC API for the Life Manager appli
 
 2. **Generate gRPC Code**
 
-   Run the following script to generate the gRPC code from the Protocol Buffer definitions:
+   Run the following command to generate the gRPC code from the Protocol Buffer definitions:
 
    ```bash
-   ./scripts/generate_grpc_code.sh
+   make grpc-generate
    ```
 
    This will generate the necessary Python code in the `api/generated` directory.
@@ -35,16 +35,10 @@ You can start the gRPC server using the provided script:
 
 ```bash
 # Start the server
-./scripts/run_server.sh
+make server-run
 
-# Generate gRPC code and start the server
-./scripts/run_server.sh --generate
-
-# Run database migrations and start the server
-./scripts/run_server.sh --migrate
-
-# Generate gRPC code, run migrations, and start the server
-./scripts/run_server.sh --generate --migrate
+# Start the server in development mode (generates gRPC code first)
+make server-dev
 ```
 
 By default, the server will start on:
@@ -105,7 +99,7 @@ The gRPC API is defined in the Protocol Buffer files located in the `protos` dir
 3. Generate the gRPC code:
 
    ```bash
-   ./scripts/generate_grpc_code.sh
+   make grpc-generate
    ```
 
 4. Implement the service in the `api/services/grpc` directory.
@@ -116,7 +110,7 @@ The gRPC API is defined in the Protocol Buffer files located in the `protos` dir
 To regenerate the gRPC code after making changes to the `.proto` files, run:
 
 ```bash
-./scripts/generate_grpc_code.sh
+make grpc-generate
 ```
 
 ## Deployment

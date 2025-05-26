@@ -152,7 +152,7 @@ Life Manager provides a high-performance gRPC API alongside the REST API. The gR
 
 2. Generate Python code from .proto files:
    ```bash
-   ./scripts/generate_grpc_code.sh
+   poetry run grpc-generate
    ```
 
 ### Running the gRPC Server
@@ -160,7 +160,7 @@ Life Manager provides a high-performance gRPC API alongside the REST API. The gR
 The gRPC server runs alongside the HTTP server by default on port 50051. You can start it using:
 
 ```bash
-python -m api
+poetry run server-run
 ```
 
 Or using Docker Compose:
@@ -221,9 +221,9 @@ grpcurl -plaintext localhost:50051 list
 ### gRPC Development
 
 1. To add a new gRPC service:
-   - Create a new `.proto` file in `api/proto/api/v1/`
+   - Create a new `.proto` file in `protos/api/v1/`
    - Define your service and messages
-   - Run `./scripts/generate_grpc_code.sh`
+   - Run `poetry run grpc-generate`
    - Implement the service in `api/services/grpc/`
    - Add the service to `api/grpc_server.py`
 
@@ -317,12 +317,12 @@ npm test
 
 1. Build and start the containers:
    ```bash
-   docker-compose up -d --build
+   poetry run docker-up
    ```
 
 2. Run database migrations:
    ```bash
-   docker-compose exec web alembic upgrade head
+   poetry run db-upgrade
    ```
 
 3. Access the application at http://localhost:8000
@@ -345,15 +345,15 @@ We use:
 
 Before committing, run:
 ```bash
-make format  # Runs black and isort
-make lint    # Runs flake8 and mypy
+poetry run format  # Runs black and isort
+poetry run lint    # Runs flake8 and mypy
 ```
 
 ### Testing
 
 Run tests with:
 ```bash
-make test
+poetry run test
 ```
 
 ### Git Hooks

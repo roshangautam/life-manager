@@ -1,9 +1,7 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-# Base class for declarative models
-Base = declarative_base()
+from .base import Base
 
 
 class Household(Base):
@@ -13,19 +11,34 @@ class Household(Base):
     name = Column(String, unique=True)
     created_by = Column(Integer, ForeignKey("users.id"))
 
-    members = relationship("HouseholdMember", back_populates="household")
+    # Relationships
+    members = relationship(
+        "HouseholdMember", 
+        back_populates="household",
+        cascade="all, delete-orphan"
+    )
+    
+    # Relationship to the creator user
+    creator = relationship("User", foreign_keys=[created_by], viewonly=True)
 
 
 class HouseholdMember(Base):
     __tablename__ = "household_members"
 
     id = Column(Integer, primary_key=True, index=True)
-    household_id = Column(Integer, ForeignKey("households.id"))
-    user_id = Column(Integer, ForeignKey("users.id"))
+    household_id = Column(Integer, ForeignKey("households.id", ondelete="CASCADE"))
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     role = Column(String, default="member")
 
-    household = relationship("Household", back_populates="members")
-    user = relationship("User", back_populates="household_memberships")
+    # Relationships
+    household = relationship(
+        "Household", 
+        back_populates="members"
+    )
+    user = relationship(
+        "User", 
+        back_populates="household_memberships"
+    )
 
 
 class HouseholdInvitation(Base):

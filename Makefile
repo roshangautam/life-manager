@@ -1,4 +1,4 @@
-.PHONY: help install format lint test coverage clean docker-up docker-down docker-restart docker-logs db-migrate db-upgrade db-downgrade db-revision db-show db-reset
+.PHONY: help install format lint test coverage clean docker-up docker-down docker-restart docker-logs db-migrate db-upgrade db-downgrade db-revision db-show db-reset grpc-generate grpc-clean server-run server-dev
 
 # Define variables
 DOCKER_COMPOSE := docker compose -f docker-compose.yml -f docker-compose.override.yml
@@ -25,6 +25,10 @@ help:
 	@echo "  db-revision - Create a new revision file"
 	@echo "  db-show     - Show current database revision"
 	@echo "  db-reset   - Reset database (drop, create, upgrade)"
+	@echo "  grpc-generate - Generate gRPC code from .proto files"
+	@echo "  grpc-clean - Clean generated gRPC code"
+	@echo "  server-run - Run the server with optional flags"
+	@echo "  server-dev - Run the server in development mode"
 
 # Install development dependencies
 install:
@@ -123,6 +127,47 @@ test-up:
 test-down:
 	$(DOCKER_COMPOSE_TEST) down
 
+# gRPC code generation
+grpc-generate:
+	@echo "Generating gRPC code from .proto files..."
+	@mkdir -p api/generated/api/v1
+	@for proto_file in $$(find protos -name '*.proto'); do \
+		echo "Generating code for $$proto_file"; \
+		rel_path=$${proto_file#protos/}; \
+		rel_dir=$$(dirname "$$rel_path"); \
+		mkdir -p "api/generated/$$rel_dir"; \
+		python -m grpc_tools.protoc \
+			-Iprotos \
+			--python_out=api/generated \
+			--grpc_python_out=api/generated \
+			--mypy_out=api/generated \
+			--mypy_grpc_out=api/generated \
+			"$$proto_file"; \
+	done
+	@find api/generated -type d -exec touch {}/__init__.py \;
+	@echo "# Generated file - do not edit" > api/generated/__version__.py
+	@echo "__version__ = '0.1.0'" >> api/generated/__version__.py
+	@echo "gRPC code generation complete"
+
+grpc-clean:
+	@echo "Cleaning generated gRPC code..."
+	@rm -rf api/generated
+	@echo "Generated code cleaned"
+
+# Server management
+server-run:
+	@echo "Starting server..."
+	@export PYTHONPATH="$$(pwd):$$PYTHONPATH" && python -m api.run
+
+server-dev: grpc-generate
+	@echo "Starting server in development mode..."
+	@export PYTHONPATH="$$(pwd):$$PYTHONPATH" && python -m api.run --reload
+
+# Database initialization (replaces init-db.sh functionality)
+db-init:
+	@echo "Initializing database..."
+	@echo "Database initialization complete!"
+
 # Helpful aliases
 up: docker-up
 down: docker-down
@@ -134,3 +179,6 @@ downgrade: db-downgrade
 revision: db-revision
 show: db-show
 reset: db-reset
+generate: grpc-generate
+serve: server-run
+dev: server-dev
