@@ -13,7 +13,7 @@ authors = [
 ]
 packages = [
     {include = "api"},
-    {include = "poetry"}
+    {include = "scripts"}
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -73,34 +73,34 @@ Source = "https://github.com/yourusername/life-manager"
 lifemanager = "api.__main__:run"
 
 # Development Commands
-format = "poetry.format:main"
-lint = "poetry.lint:main"
-test = "poetry.test:main"
-coverage = "poetry.coverage:main"
-clean = "poetry.clean:main"
-init-db = "poetry.init_db:main"
+format = "scripts.format:main"
+lint = "scripts.lint:main"
+test = "scripts.test:main"
+coverage = "scripts.coverage:main"
+clean = "scripts.clean:main"
+init-db = "scripts.init_db:main"
 
 # Database Commands
-db-migrate = "poetry.db:migrate"
-db-upgrade = "poetry.db:upgrade"
-db-downgrade = "poetry.db:downgrade"
-db-revision = "poetry.db:revision"
-db-show = "poetry.db:show"
-db-reset = "poetry.db:reset"
+db-migrate = "scripts.db:migrate"
+db-upgrade = "scripts.db:upgrade"
+db-downgrade = "scripts.db:downgrade"
+db-revision = "scripts.db:revision"
+db-show = "scripts.db:show"
+db-reset = "scripts.db:reset"
 
 # gRPC Commands
-grpc-generate = "poetry.grpc:generate"
-grpc-clean = "poetry.grpc:clean"
+grpc-generate = "scripts.grpc:generate"
+grpc-clean = "scripts.grpc:clean"
 
 # Server Management
-server-run = "poetry.server:run"
-server-dev = "poetry.server:dev"
+server-run = "scripts.server:run"
+server-dev = "scripts.server:dev"
 
 # Docker Compose
-docker-up = "poetry.docker:up"
-docker-down = "poetry.docker:down"
-docker-restart = "poetry.docker:restart"
-docker-logs = "poetry.docker:logs"
+docker-up = "scripts.docker:up"
+docker-down = "scripts.docker:down"
+docker-restart = "scripts.docker:restart"
+docker-logs = "scripts.docker:logs"
 
 [tool.black]
 line-length = 88

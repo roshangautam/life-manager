@@ -19,7 +19,7 @@ def dev():
 
     # Generate gRPC code first
     print("Generating gRPC code...")
-    grpc_result = subprocess.run(["poetry", "run", "grpc-generate"])
+    grpc_result = subprocess.run(["make", "grpc-generate"])
     if grpc_result.returncode != 0:
         return grpc_result.returncode
 
