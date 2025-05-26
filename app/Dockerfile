@@ -1,12 +1,15 @@
-FROM node:21-alpine
+FROM node:23-alpine
 
 WORKDIR /app
 
-# Copy the application
-COPY . .
+# Copy application
+COPY app/ .
 
 # Set environment variables
-ENV NODE_ENV=production
+# ENV NODE_ENV=production
+
+RUN node --version
+RUN npm --version
 
 # Install dependencies
 RUN yarn install
