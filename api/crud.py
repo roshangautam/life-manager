@@ -1,6 +1,5 @@
+""" Module for CRUD operations in the finance management application"""
 from typing import Optional
-
-from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from . import models, security
@@ -14,12 +13,13 @@ from .schemas_main import (
 )
 
 
-# User CRUD operations
 def get_user_by_email(db: Session, email: str):
+    """Get a user by email"""
     return db.query(models.User).filter(models.User.email == email).first()
 
 
 def create_user(db: Session, user: UserCreate):
+    """Create a new user"""
     hashed_password = security.get_password_hash(user.password)
     db_user = models.User(
         email=user.email,

@@ -5,6 +5,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+ARG USERNAME=lifemanager
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -15,42 +19,68 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends build-essential && \
+    apt-get install -y procps lsof && \ 
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
-    pip install poetry
+    pip install poetry && \
+    pip install setuptools wheel
 
-# Copy the rest of the application
-COPY . .
+# Configure Poetry to create the virtualenv in the project's directory
+RUN poetry config virtualenvs.in-project true
 
-# Install the package in development mode
+# Copy dependency definition files
+COPY README.md pyproject.toml poetry.lock* ./
+COPY scripts/ ./scripts/
+COPY alembic.ini /app/
+COPY .env.example /app/.env
+COPY migrations /app/migrations
+# Install project dependencies (including the project itself)
+# Exclude development dependencies for production
 RUN poetry install --no-interaction --no-ansi
 
-# Create a non-root user
-RUN groupadd -r appuser && \
-    useradd -r -g appuser appuser && \
-    chown -R appuser:appuser /app
+# Copy the application
+COPY . .
 
-# Create necessary directories and set permissions
-RUN mkdir -p /app/uploads && \
-    chown -R appuser:appuser /app/uploads && \
+# Create necessary directories and 
+RUN mkdir -p /app/uploads 
+
+# Create the user
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    #
+    # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
+    && apt-get update \
+    && apt-get install -y sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
+
+# ********************************************************
+# * Anything else you want to do like clean up goes here *
+# ********************************************************
+
+# Set permissions
+RUN chown -R ${USERNAME}:${USERNAME} /app/uploads && \
     chmod -R 755 /app/uploads
-
-# Switch to non-root user
-USER appuser
 
 # Set environment variables
 ENV PYTHONPATH=/app \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PATH="/home/appuser/.local/bin:$PATH"
+    PATH="/home/${USERNAME}/.local/bin:$PATH"
 
-# Expose the port the app runs on
+# Expose the ports the app runs on
+#FastAPI
 EXPOSE 8000
 
-# Command to run the application with auto-reload for development
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+#gRPC
+EXPOSE 50051
+
+# [Optional] Set the default user. Omit if you want to keep the default as root.
+USER $USERNAME
+
+# Command to run the application
+CMD ["/app/scripts/run_server.sh", "--migrate", "--generate"]

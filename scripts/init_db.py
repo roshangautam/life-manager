@@ -7,11 +7,10 @@ This script should be run after the database is created and migrations are appli
 import os
 import sys
 from getpass import getpass
+from api.database import init_db
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from api.database import init_db
 
 
 def main():

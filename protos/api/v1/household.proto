@@ -4,6 +4,7 @@ package api.v1;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
+import "api/v1/user.proto";
 
 // Household represents a household group.
 message Household {

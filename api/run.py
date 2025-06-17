@@ -10,7 +10,7 @@ import logging
 import signal
 import sys
 from concurrent import futures
-from typing import Any, Callable, List, Optional
+from typing import Any, List, Optional
 
 import grpc
 import uvicorn
@@ -19,7 +19,6 @@ from grpc_health.v1 import health as health_servicer
 from grpc_health.v1 import health_pb2, health_pb2_grpc
 from grpc_reflection.v1alpha import reflection
 
-from . import __version__
 from .config import settings
 from .grpc_interceptors import create_grpc_interceptors
 
@@ -251,9 +250,20 @@ def run() -> None:
         max_workers=settings.WORKERS,
     )
 
-    # Run the application
-    asyncio.run(manager.run())
+    # Check if we're in an event loop already
+    try:
+        loop = asyncio.get_running_loop()
+        # We're already in an event loop (likely Uvicorn's)
+        return asyncio.ensure_future(manager.run())
+    except RuntimeError:
+        # No running event loop, create one with asyncio.run()
+        asyncio.run(manager.run())
 
+# Create an ASGI app object for Uvicorn to use directly
+from .main import app as fastapi_app
+
+# This is what will be imported when using api.__main__:app
+app = fastapi_app
 
 if __name__ == "__main__":
     run()

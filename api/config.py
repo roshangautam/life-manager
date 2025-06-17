@@ -1,16 +1,20 @@
+"""Module for Life Manager API Configuration"""
+
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from dotenv import load_dotenv
-from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, validator
+from pydantic import AnyHttpUrl, EmailStr, PostgresDsn, validator
 
 # Load environment variables from .env file
 env_path = Path(__file__).parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
 
-class Settings(BaseSettings):
+class Settings:
+    """Application settings and configuration using Pydantic."""
+
     # Application settings
     PROJECT_NAME: str = "Life Manager"
     API_V1_STR: str = "/api/v1"
@@ -52,7 +56,9 @@ class Settings(BaseSettings):
     ]
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
+    @staticmethod
+    def assemble_cors_origins(v: Union[str, List[str]]) -> Union[List[str], str]:
+        """Convert comma-separated string to list or return list as is."""
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         elif isinstance(v, (list, str)):
@@ -67,8 +73,13 @@ class Settings(BaseSettings):
     DATABASE_URI: Optional[PostgresDsn] = None
 
     @validator("DATABASE_URI", pre=True)
+    @classmethod
     def assemble_db_connection(cls, v: Optional[str], values: Dict[str, Any]) -> Any:
+        """Construct the database connection string."""
         if isinstance(v, str):
+            # Fix postgres:// to postgresql:// for compatibility
+            if v.startswith("postgres://"):
+                v = v.replace("postgres://", "postgresql://", 1)
             return v
         return PostgresDsn.build(
             scheme="postgresql",
@@ -96,7 +107,9 @@ class Settings(BaseSettings):
     EMAILS_FROM_NAME: Optional[str] = None
 
     @validator("EMAILS_FROM_NAME")
+    @classmethod
     def get_project_name(cls, v: Optional[str], values: Dict[str, Any]) -> str:
+        """Use project name as default sender name if not provided."""
         if not v:
             return values["PROJECT_NAME"]
         return v
@@ -106,7 +119,9 @@ class Settings(BaseSettings):
     EMAILS_ENABLED: bool = False
 
     @validator("EMAILS_ENABLED", pre=True)
+    @classmethod
     def get_emails_enabled(cls, v: bool, values: Dict[str, Any]) -> bool:
+        """Determine whether e-mail is enabled or not."""
         return bool(
             values.get("SMTP_HOST")
             and values.get("SMTP_PORT")
@@ -114,6 +129,7 @@ class Settings(BaseSettings):
         )
 
     class Config:
+        """Configuration for settings."""
         case_sensitive = True
         env_file = ".env"
 
@@ -125,5 +141,8 @@ settings = Settings()
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
-DATABASE_URL = settings.DATABASE_URI or os.getenv("DATABASE_URL", "")
+DATABASE_URL = str(settings.DATABASE_URI or os.getenv("DATABASE_URL", ""))
+# Fix postgres:// in DATABASE_URL if present
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 API_V1_STR = settings.API_V1_STR

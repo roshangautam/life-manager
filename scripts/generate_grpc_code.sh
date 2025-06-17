@@ -34,13 +34,13 @@ for proto_file in $(find "${PROTO_DIR}" -name '*.proto'); do
     "${proto_file}"
     
   # Fix import paths in generated files
-  for generated_file in $(find "${OUTPUT_DIR}" -name '*.py' -o -name '*.pyi'); do
+  # for generated_file in $(find "${OUTPUT_DIR}" -name '*.py' -o -name '*.pyi'); do
     # Fix imports to use the full path from the project root
-    sed -i '' -e "s/^import /import api.generated./g" "$generated_file"
-    sed -i '' -e "s/^from api.v1 import /from api.generated.api.v1 import /g" "$generated_file"
-    sed -i '' -e "s/^from api.v1/from api.generated.api.v1/g" "$generated_file"
-    sed -i '' -e "s/from google/from api.generated.google/g" "$generated_file"
-  done
+    # sed -i '' -e "s/^import /import api.generated./g" "$generated_file"
+    # sed -i '' -e "s/^from api.v1 import /from api.generated.api.v1 import /g" "$generated_file"
+    # sed -i '' -e "s/^from api.v1/from api.generated.api.v1/g" "$generated_file"
+    # sed -i '' -e "s/from google/from api.generated.google/g" "$generated_file"
+  # done
 done
 
 # Create __init__.py files to make the directories Python packages

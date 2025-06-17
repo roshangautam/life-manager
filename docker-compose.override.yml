@@ -25,9 +25,6 @@ services:
     ports:
       - "8000:8000"
       - "50051:50051"  # gRPC port
-    command: >
-      sh -c "alembic upgrade head &&
-             python -m api"
 
   # Uncomment and customize if you have an app
   # app:

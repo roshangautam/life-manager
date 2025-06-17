@@ -1,6 +1,5 @@
 """Life Manager - A comprehensive household and personal finance management system."""
 
-import os
 from pathlib import Path
 
 from setuptools import find_packages, setup
@@ -27,9 +26,9 @@ setup(
     description="A comprehensive household and personal finance management system",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Your Name",
-    author_email="your.email@example.com",
-    url="https://github.com/yourusername/life-manager",
+    author="Roshan Gautam",
+    author_email="contact@roshangautam.net",
+    url="https://github.com/roshangautam/life-manager",
     license="MIT",
     classifiers=[
         "Development Status :: 3 - Alpha",
